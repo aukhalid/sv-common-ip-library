@@ -1,1 +1,2 @@
-ada
+package crc_pkg;
+endpackage
