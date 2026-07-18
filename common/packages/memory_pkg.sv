@@ -1,5 +1,5 @@
 // ==============================================================================
-// AUTHOR: Ahasan Ullah Khalid
+// AUTHOR:  Ahasan Ullah Khalid
 // PROJECT: sv-common-ip-library
 // ASSET:   memory_pkg.sv (Global Memory Package)
 // ==============================================================================
