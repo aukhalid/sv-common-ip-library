@@ -75,7 +75,7 @@ module single_port_ram #(
   end
 
 
-  // 3. Optional Output Pipelined Target Stage (OUT_REG Control Execution)
+  // 3. Optional Output Pipelined Target Stage
   always_ff @(posedge clk_i) begin
     if (!rst_n_i) begin
       ram_data_reg <= '0;
@@ -84,7 +84,7 @@ module single_port_ram #(
     end
   end
 
-  // Continuous assignment mapping output lines back out using plain logic variants
+  // Continuous assignment mapping
   assign rd_data_o = (OUT_REG) ? ram_data_reg : ram_data_out;
 
 
