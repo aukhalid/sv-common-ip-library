@@ -1,6 +1,8 @@
 # sv-common-ip-library
 
-## Project Stracture
+## 📁 Project Structure
+
+```
 sv-common-ip-library/
 ├── README.md
 ├── LICENSE
@@ -114,3 +116,5 @@ sv-common-ip-library/
     ├── parity_checker/
     ├── checksum/
     └── popcount/
+
+```
