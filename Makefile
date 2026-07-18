@@ -15,9 +15,7 @@ ROOT_DIR := $(shell pwd)
 export COMMON_PKG_DIR   := $(REPO_ROOT)/common/packages
 export COMMON_INC_DIR   := $(REPO_ROOT)/common/interfaces
 export COMMON_MACRO_DIR := $(REPO_ROOT)/common/macros
+export COMMON_ASRT_DIR  := $(REPO_ROOT)/common/assertions  # New directory pointer
 
-# Consolidate tool inclusion flags for Verilator and Vivado XSim
-# -y triggers directory searches for modules/interfaces
-# -I links header files (.svh) for compiler text-substitution
-export COMMON_SIM_FLAGS := -I$(COMMON_MACRO_DIR) $(wildcard $(COMMON_PKG_DIR)/*.sv) $(wildcard $(COMMON_INC_DIR)/*.sv)
-export COMMON_LINT_FLAGS:= -I$(COMMON_MACRO_DIR) -y $(COMMON_PKG_DIR) -y $(COMMON_INC_DIR)
+export COMMON_SIM_FLAGS := -I$(COMMON_MACRO_DIR) $(wildcard $(COMMON_PKG_DIR)/*.sv) $(wildcard $(COMMON_INC_DIR)/*.sv) $(wildcard $(COMMON_ASRT_DIR)/*.sv)
+export COMMON_LINT_FLAGS:= -I$(COMMON_MACRO_DIR) -y $(COMMON_PKG_DIR) -y $(COMMON_INC_DIR) -y $(COMMON_ASRT_DIR)
