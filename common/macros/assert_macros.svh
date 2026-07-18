@@ -15,4 +15,10 @@
     $error("[ASSERTION ERROR] Time: \%0t \vert{} \%s", $time, msg); \
   end
 
+// Macro: Ensures that a specified control signal does not resolve to an unknown 'X' state during active cycles
+`define ASSERT_NO_X(clk, signal, msg) \
+  assert property (@(posedge clk) !$isunknown(signal)) else begin \
+    $error("[PROTOCOL VIOLATION] Time: %0t | Target signal contains X/Z state! Context: %s", $time, msg); \
+  end
+
 `endif  // ASSERT_MACROS_SVH

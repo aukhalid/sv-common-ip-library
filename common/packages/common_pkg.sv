@@ -1,6 +1,9 @@
-//File: common/packages/common_pkg.sv
-//Purpose: Common package container for all common packages to use later in the design. This package is used to include all the common packages in a single
-//package for easy inclusion in other modules.
+// ==============================================================================
+// AUTHOR:  Ahasan Ullah Khalid
+// PROJECT: sv-common-ip-library
+// ASSET:   common_pkg.sv (Global Common Package)
+// Purpose: This package serves as a container for all common packages used in the design. It provides a centralized location for defining global parameters, types, and shared resources that can be utilized across different modules and interfaces in the design. By including this package, designers can easily access and manage common definitions, promoting code reusability and maintainability.
+// ==============================================================================
 
 package common_pkg;
 
