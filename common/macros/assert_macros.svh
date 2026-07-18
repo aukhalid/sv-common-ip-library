@@ -1,19 +1,27 @@
-// File: common/macros/assert_macros.svh
-// Reusable macro for synchronous protocol assertions
+// ==============================================================================
+// AUTHOR      : Ahasan Ullah Khalid
+// PROJECT     : sv-common-ip-library
+// File        : assert_macros.svh
+// Description : Assertion macros for protocol checking
+// ==============================================================================
 
 `ifndef ASSERT_MACROS_SVH
 `define ASSERT_MACROS_SVH
 
-// Macro checks if a condition holds true; otherwise, throws an error with context
-`define ASSERT(condition, message) \
-  if (!(condition)) begin \
-    $error("Assertion failed: %s at time %0t in %m", message, $time); \
-  end
+//-----------------------------------------------------------------------
+// Immediate assertion — use inside procedural (always) blocks
+//-----------------------------------------------------------------------
+`define ASSERT(name, cond) \
+    name: assert (cond) \
+      else $error("[ASSERTION FAILED] %s at time %0t", `"name`", $time);
 
-`define ASSERT_CLK(clk, condition, message) \
-  assert property (@(posedge clk) condition) else begin \
-    $error("[ASSERTION ERROR] Time: \%0t \vert{} \%s", $time, msg); \
-  end
+//-----------------------------------------------------------------------
+// Concurrent (clocked) assertion — use at module scope
+//-----------------------------------------------------------------------
+`define ASSERT_CLK(name, cond, clk) \
+    name: assert property (@(posedge clk) (cond)) \
+      else $error("[ASSERTION FAILED] %s at time %0t", `"name`", $time);
+
 
 // Macro: Ensures that a specified control signal does not resolve to an unknown 'X' state during active cycles
 `define ASSERT_NO_X(clk, signal, msg) \
