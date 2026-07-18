@@ -7,7 +7,7 @@ sv-common-ip-library/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
-├── Makefile                         # Master Build Controller
+├── Makefile                   
 │
 ├── docs/
 │   ├── coding_style.md
