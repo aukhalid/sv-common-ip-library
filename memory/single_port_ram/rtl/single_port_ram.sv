@@ -15,7 +15,6 @@
 //=============================================================================
 
 module single_port_ram #(
-
     int                      DATA_WIDTH = memory_pkg::RAM_DEFAULT_DATA_WIDTH,
     int                      ADDR_WIDTH = memory_pkg::RAM_DEFAULT_ADDR_WIDTH,
     bit                      OUT_REG    = 1'b0,
