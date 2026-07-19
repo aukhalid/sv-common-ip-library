@@ -20,7 +20,6 @@ interface memory_if #(
 );
 
   // Memory Interface Signals
-  logic                  cs;
   logic                  wr_en;
   logic [ADDR_WIDTH-1:0] addr;
   logic [DATA_WIDTH-1:0] wr_data;
@@ -28,7 +27,6 @@ interface memory_if #(
 
   // Modport for memory access (Read/Write)
   modport master(
-      output cs,
       output wr_en,
       output addr,
       output wr_data,
@@ -36,7 +34,6 @@ interface memory_if #(
   );  // Master modport for driving memory access signals
 
   modport slave(
-      input cs,
       input wr_en,
       input addr,
       input wr_data,

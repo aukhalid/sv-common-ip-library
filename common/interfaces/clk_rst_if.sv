@@ -3,8 +3,8 @@
 
 interface clk_rst_if;
 
-  logic clk;  // Clock signal
-  logic rst_n;  // Active-low reset signal
+  logic clk;
+  logic rst_n;
 
   // Modports for the testbench driver
 

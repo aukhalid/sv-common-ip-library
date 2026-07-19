@@ -1,4 +1,4 @@
-# Micro-Architecture & Verification Specification: Parameterized Single-Port RAM
+# Parameterized Single-Port RAM: Micro-Architecture & Verification Specification
 
 ## 1. Architectural Overview
 
