@@ -1,4 +1,4 @@
-# RTL Design & Verification Lab - Complete Environment Setup Guide
+# RTL Design & Verification - Complete Environment Setup Guide
 
 A step-by-step guide to building an industry-grade, tape-out-ready Linux development environment on a Windows host.
 
@@ -6,39 +6,13 @@ A step-by-step guide to building an industry-grade, tape-out-ready Linux develop
 
 ## Table of Contents
 
-1. [Architecture Overview](#architecture-overview)
-2. [Part 1: Tool Selection Stack](#part-1-tool-selection-stack)
-3. [Part 2: Virtual Machine Deployment](#part-2-virtual-machine-deployment)
-4. [Part 3: IDE & Software Installation](#part-3-ide--software-installation)
-5. [Part 4: Tool Environment Configuration](#part-4-tool-environment-configuration)
-6. [Part 5: Secure GitHub Authentication](#part-5-secure-github-authentication)
-7. [Part 6: VS Code Development Suite](#part-6-vs-code-development-suite)
-8. [Part 7: Verification Smoke Test](#part-7-verification-smoke-test)
-
----
-
-## Architecture Overview
-
-```text
-+-------------------------------------------------------------+
-|                     WINDOWS HOST PC                         |
-|  [VMware Workstation Player / Pro]                          |
-+-------------------------------------------------------------+
-                               |
-                               v Virtualizes
-+-------------------------------------------------------------+
-|                   VIRTUAL MACHINE ENVIRONMENT               |
-|  [OS: Ubuntu 22.04 LTS]                                     |
-+-------------------------------------------------------------+
-            |                      |                   |
-            v                      v                   v
-+-----------------------+  +---------------+  +---------------+
-|     IDE & TOOLCHAIN   |  |  AUTOMATION   |  |   EDA ENGINES |
-|  [VS Code + Git/SSH]  |  |  [GNU Make]   |  |  [AMD Vivado] |
-|  [Draw.io + Linter]   |  |               |  |  [Verilator]  |
-|                       |  |               |  |  [GTKWave]    |
-+-----------------------+  +---------------+  +---------------+
-```
+1. [Part 1: Tool Selection Stack](#part-1-tool-selection-stack)
+2. [Part 2: Virtual Machine Deployment](#part-2-virtual-machine-deployment)
+3. [Part 3: IDE & Software Installation](#part-3-ide--software-installation)
+4. [Part 4: Tool Environment Configuration](#part-4-tool-environment-configuration)
+5. [Part 5: Secure GitHub Authentication](#part-5-secure-github-authentication)
+6. [Part 6: VS Code Development Suite](#part-6-vs-code-development-suite)
+7. [Part 7: Verification Smoke Test](#part-7-verification-smoke-test)
 
 ---
 

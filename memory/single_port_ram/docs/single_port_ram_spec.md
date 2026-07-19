@@ -19,54 +19,7 @@ In alignment with physical foundry constraints, this module is engineered as a s
 
 The operational block diagram highlights the isolation between the synthesizable control logic core and the external non-intrusive assertion probe layer:
 
-```text
-       +--------------------------------------------------------------+
-       | MODULE: single_port_ram                                      |
-       |                                                              |
-       |                   +-----------------------+                  |
------->| clk_i             |   Memory Core Matrix  |                  |
------->| rst_n_i           |                       |                  |
------->| wr_en_i           |   [DATA_WIDTH-1:0]    |                  |
------->| addr_i ---------->|   mem_core            |                  |
------->| wr_data_i ------->|   [0:MEM_DEPTH-1]     |                  |
-       |                   +-----------+-----------+                  |
-       |                               |                              |
-       |                               v                              |
-       |                   +-----------------------+                  |
-       |                   |  Write Mode Selector  |                  |
-       |                   |  (WF / RF / NC)       |                  |
-       |                   +-----------+-----------+                  |
-       |                               |                              |
-       |                               v                              |
-       |                   +-----------------------+                  |
-       |                   | ram_data_out Register |                  |
-       |                   +-----------+-----------+                  |
-       |                               |                              |
-       |                               +--------------+               |
-       |                               |              |               |
-       |                               v (OUT_REG=0)  v (OUT_REG=1)   |
-       |                           +-------+      +-------+           |
-       |                           | Bypass|      |Pipeline|          |
-       |                           +-------+      +-------+           |
-       |                               |              |               |
-       |                               v              v               |
-       |                           +-----------------------+          |
-       |                           |    Mux Multiplexer    |          |
-       |                           +-----------+-----------+          |
-       |                                       |                      |
-       |                                       v                      |
-<------| rd_data_o <---------------------------+                      |
-       |                                                              |
-       +--------------------------------------------------------------+
-                                       ^
-                                       | (Non-intrusive Monitoring via bind)
-       +-------------------------------+------------------------------+
-       | MODULE: ram_protocol_assertions                              |
-       | * ASSERT_NO_X (wr_en_i)                                      |
-       | * p_stable_addr_during_write                                 |
-       | * p_no_x_data_during_write                                   |
-       +--------------------------------------------------------------+
-```
+![single_port_ram](single_port_ram.svg)
 
 ## 3. Micro-Architectural Port & Parameter Specification
 
