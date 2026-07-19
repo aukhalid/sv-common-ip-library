@@ -1,4 +1,4 @@
-# RTL Design & Verification Lab — Complete Environment Setup Guide
+# RTL Design & Verification Lab - Complete Environment Setup Guide
 
 A step-by-step guide to building an industry-grade, tape-out-ready Linux development environment on a Windows host.
 
