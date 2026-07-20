@@ -1,183 +1,193 @@
 # RTL Design & Verification - Complete Environment Setup Guide
 
-A step-by-step guide to building an industry-grade, tape-out-ready Linux development environment on a Windows host.
+A production-grade guide to setting up a Linux development environment for Digital Design and Verification on Windows. Supports **WSL2**, **VMware Workstation**, and **Native Dual-Boot**.
 
 ---
 
-## Table of Contents
+## Part 1: Choosing Your Linux Platform
 
-1. [Part 1: Tool Selection Stack](#part-1-tool-selection-stack)
-2. [Part 2: Virtual Machine Deployment](#part-2-virtual-machine-deployment)
-3. [Part 3: IDE & Software Installation](#part-3-ide--software-installation)
-4. [Part 4: Tool Environment Configuration](#part-4-tool-environment-configuration)
-5. [Part 5: Secure GitHub Authentication](#part-5-secure-github-authentication)
-6. [Part 6: VS Code Development Suite](#part-6-vs-code-development-suite)
-7. [Part 7: Verification Smoke Test](#part-7-verification-smoke-test)
+| Method                 | Setup Complexity | Best Used For                                                                     |
+| ---------------------- | ---------------- | --------------------------------------------------------------------------------- |
+| **WSL2 (Recommended)** | Low              | Fastest setup, lowest RAM usage, seamless VS Code & GUI (WSLg) integration        |
+| **VMware Workstation** | Medium           | Complete VM isolation, dedicated virtual disk, traditional desktop GUI            |
+| **Dual-Boot Ubuntu**   | High             | Direct hardware access, dedicated physical lab setup, physical FPGA JTAG bring-up |
 
----
+### Why WSL2 is Recommended
 
-## Part 1: Tool Selection Stack
-
-| Component           | Software                                                                                                                                | Why                                                                                                |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Virtualizer**     | [VMware Workstation Pro](https://support.broadcom.com/security-advisory/security-advisory-detail.html?securit-advisory-id=SA2025062401) | Free since Broadcom acquisition. Excellent hardware acceleration and stable multi-core allocation. |
-| **OS**              | [Ubuntu 22.04.5 LTS Desktop](https://releases.ubuntu.com/jammy)                                                                         | Industry-standard stability. Avoids library tracking errors common in newer releases.              |
-| **Simulator**       | [AMD Vivado ML Standard](https://www.xilinx.com/support/download.html)                                                                  | Free edition with full SystemVerilog support and native UVM 1.2 in XSim.                           |
-| **Linter**          | Verilator                                                                                                                               | Ultra-fast open-source static analysis and latch prevention.                                       |
-| **Waveform Viewer** | GTKWave                                                                                                                                 | Lightweight, efficient VCD trace reader.                                                           |
-| **IDE**             | [VS Code](https://code.visualstudio.com/download)                                                                                       | Strong extension ecosystem for HDLs.                                                               |
-| **Formatter**       | [Verible](https://github.com/chipsalliance/verible/releases)                                                                            | Google-developed SystemVerilog formatter, linter, and language server.                             |
+- **Near-Native Speed**: Real Linux kernel on a lightweight Hyper-V utility VM — no heavy VM overhead.
+- **Native GUI (WSLg)**: Windows 10 (21H2+) and Windows 11 render Linux GUI apps (`gtkwave`, `vivado`, `drawio`) seamlessly inside Windows desktop windows.
+- **VS Code Remote Integration**: VS Code runs on Windows while its execution server runs inside WSL2, giving you native file speed and responsiveness.
 
 ---
 
-## Part 2: Virtual Machine Deployment
+## Part 2: Platform Deployment
 
-### Step 1: Install VMware & Create VM
+Choose **one** deployment pathway below.
 
-1. Download **VMware Workstation Pro** (free) from Broadcom:  
-   https://support.broadcom.com/security-advisory/security-advisory-detail.html?securit-advisory-id=SA2025062401
-2. Download **Ubuntu 22.04.5 LTS Desktop ISO**:  
-   https://releases.ubuntu.com/jammy/ubuntu-22.04.5-desktop-amd64.iso
-3. In VMware: **Create a New Virtual Machine** → select the ISO.
-4. Configure VM hardware:
+### Option A: WSL2 Deployment (Recommended)
 
-| Resource  | Minimum | Recommended                  |
-| --------- | ------- | ---------------------------- |
-| CPU Cores | 4       | 6+                           |
-| RAM       | 8 GB    | 12–16 GB (if host has 32 GB) |
-| Disk      | 120 GB  | 150 GB (single file)         |
+Open **PowerShell as Administrator** and run:
 
-> **Why single file?** Faster disk I/O. Vivado needs massive installation space.
+```powershell
+wsl --install -d Ubuntu-22.04
+```
 
-### Step 2: System Update & Dependencies
+Restart your computer when prompted.
 
-Boot the VM, open a terminal (`Ctrl + Alt + T`), and run:
+Launch **Ubuntu 22.04 LTS** from the Windows Start Menu, set your Linux username and password, then verify WSLg graphics:
 
 ```bash
-# Update system
+sudo apt update && sudo apt install -y x11-apps
+xclock
+```
+
+> A small analog clock window should open seamlessly inside Windows.
+
+### Option B: VMware Workstation Deployment
+
+1. Download **VMware Workstation Pro** (Free from Broadcom) and the **Ubuntu 22.04.5 LTS ISO**.
+2. Create a new VM with:
+   - **CPU Cores**: 4 minimum (6+ recommended)
+   - **RAM**: 8 GB minimum (12–16 GB recommended)
+   - **Disk Space**: 120–150 GB (Single File allocation)
+
+### Option C: Native Dual-Boot Deployment
+
+1. Create an Ubuntu Live USB using **Rufus** and the Ubuntu 22.04.5 LTS ISO.
+2. Shrink your Windows partition by at least **120 GB** in Windows Disk Management.
+3. Boot into BIOS/UEFI, **disable Secure Boot**, boot from the USB drive, and complete the dual-boot installation alongside Windows.
+
+---
+
+## Part 3: Toolchain Installation
+
+Execute all subsequent steps inside your **Ubuntu 22.04 LTS terminal**.
+
+### Step 1: Base System Update & Build Tools
+
+```bash
+# Update repository indexes
 sudo apt update && sudo apt upgrade -y
 
-# Core build tools
-sudo apt install -y build-essential gcc g++ make git git-lfs \
-  python3 python3-pip lsb-release net-tools curl wget universal-ctags
+# Essential build and networking utilities
+sudo apt install -y build-essential gcc g++ make git git-lfs   python3 python3-pip lsb-release net-tools curl wget universal-ctags
 
-# Vivado GUI dependencies (legacy libraries)
-sudo apt install -y libtinfo5 libncurses5 libncursesw5 libxrender1 \
-  libxtst6 libxi6 libxft2 libfontconfig1 libx11-6 libxext6 libtinfo-dev
+# Legacy dependencies for Vivado & GUI rendering
+sudo apt install -y libtinfo5 libncurses5 libncursesw5 libxrender1   libxtst6 libxi6 libxft2 libfontconfig1 libx11-6 libxext6 libtinfo-dev
 ```
 
-### Step 3: Install Open-Source EDA Tools
+### Step 2: Open-Source EDA Tools
 
 ```bash
-sudo apt install -y gtkwave verilator
+sudo apt install -y iverilog gtkwave verilator
 ```
 
----
-
-## Part 3: IDE & Software Installation
-
-### Step 1: Install VS Code
+### Step 3: Visual Studio Code
 
 ```bash
-# Clean legacy repos
+# Clean conflicting legacy repos
 sudo rm -f /etc/apt/sources.list.d/vscode.list
 
-# Add Microsoft GPG key
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | \
-  gpg --dearmor | sudo tee /etc/apt/keyrings/packages.microsoft.gpg > /dev/null
+# Import Microsoft GPG key
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc |   gpg --dearmor | sudo tee /etc/apt/keyrings/packages.microsoft.gpg > /dev/null
 
-# Add VS Code repository
+# Register official repository
 sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
 
-# Install
-sudo apt update
-sudo apt install -y code
+# Install VS Code
+sudo apt update && sudo apt install -y code
 ```
 
-### Step 2: Install AMD Vivado ML Standard
+> **WSL2 Users**: Also download and install VS Code on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code.
 
-1. Download the **Linux Web Installer** from AMD:  
-   https://www.xilinx.com/support/download.html  
-   (Look for "Vivado ML Standard Edition" — free, no license required.)
+### Step 4: AMD Vivado ML Standard
 
+Skip if you are exclusively using Icarus Verilog (`iverilog`).
+
+1. Download **Vivado ML Standard Edition (Linux Web Installer)** from AMD.
 2. Run the installer:
 
 ```bash
 cd ~/Downloads
 chmod +x FPGAs_AdaptiveSoCs_Unified_*.bin
 
-# Create install directory
+# Create installation target path
 sudo mkdir -p /tools/Xilinx
 sudo chown -R $USER:$USER /tools/Xilinx
 
-# Launch installer
+# Execute installer
 ./FPGAs_AdaptiveSoCs_Unified_*.bin
 ```
 
-3. **Installer selections:**
-   - **Product:** Vivado
-   - **Edition:** Vivado ML Standard (free)
-   - **Devices:** Uncheck UltraScale+/Versal to save ~40 GB. Keep **XSim** checked.
-   - **Path:** `/tools/Xilinx`
+**Installer Settings:**
 
-4. **Install cable drivers** (for hardware debugging):
+- Select **Vivado ML Standard**
+- Uncheck heavy FPGA families (UltraScale+/Versal) to save ~40 GB
+- Set destination to `/tools/Xilinx`
+
+**Install Cable Drivers:**
 
 ```bash
 cd /tools/Xilinx/Vivado/2024.2/data/xicom/cable_drivers/lin64/install_script/install_drivers/
 sudo ./install_drivers
 ```
 
-### Step 3: Install Verible (SystemVerilog Formatter)
+### Step 5: Verible Formatter
 
 ```bash
-# Download latest release (check https://github.com/chipsalliance/verible/releases for current version)
 cd ~/Downloads
-wget https://github.com/chipsalliance/verible/releases/download/v0.0-4080-ga0a8d8eb/verible-v0.0-4080-ga0a8d8eb-linux-static-x86_64.tar.gz
+wget https://github.com/chipsalliance/verible/releases/download/v0.0-3644-g6c271816/verible-v0.0-3644-g6c271816-linux-static-x86_64.tar.gz
 
-# Extract and install
-tar -xzf verible-v0.0-4080-ga0a8d8eb-linux-static-x86_64.tar.gz
+tar -xzf verible-*.tar.gz
 sudo cp verible-*/bin/verible-verilog-format /usr/local/bin/
 
-# Verify
+# Verify installation
 verible-verilog-format --version
 ```
 
 ---
 
-## Part 4: Tool Environment Configuration
+## Part 4: Environment & Workspace Setup
 
-### Step 1: Configure Bash Environment
+### Step 1: Shell Configuration
+
+Open `~/.bashrc`:
 
 ```bash
 nano ~/.bashrc
 ```
 
-Add at the bottom:
+Append the following to the bottom:
 
 ```bash
 # ==============================================================================
-# AMD Vivado 2024.2 & EDA Toolchain
+# RTL & DV Toolchain Environment Configuration
 # ==============================================================================
-source /tools/Xilinx/Vivado/2024.2/settings64.sh
-alias vsim="vivado -mode gui &"
+
+# Vivado Settings (Uncomment if Vivado is installed)
+# source /tools/Xilinx/Vivado/2024.2/settings64.sh
+# alias vsim="vivado -mode gui &"
+
+# Short aliases
+alias ivrun="iverilog -g2012"
 ```
 
-Save (`Ctrl+O`, `Enter`, `Ctrl+X`), then reload:
+Reload configuration:
 
 ```bash
 source ~/.bashrc
 ```
 
-### Step 2: Create Project Workspace
+### Step 2: Workspace Directory Initialization
 
 ```bash
 mkdir -p ~/workspace/rtl-dv-portfolio/sv-common-ip-library
 cd ~/workspace/rtl-dv-portfolio/sv-common-ip-library
 
-# Core infrastructure
+# Infrastructure
 mkdir -p docs scripts common/{packages,interfaces,macros,assertions}
 
-# IP blocks
+# IP Subdirectories
 IP_LIST=(
   "foundation/clock_divider"
   "foundation/reset_sync"
@@ -211,46 +221,32 @@ touch README.md LICENSE .gitignore Makefile
 
 ---
 
-## Part 5: Secure GitHub Authentication
-
-### Step 1: Set Git Identity
+## Part 5: Secure GitHub Setup
 
 ```bash
+# 1. Configure identity
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
-```
 
-### Step 2: Generate SSH Key
-
-```bash
+# 2. Generate SSH Key
 ssh-keygen -t ed25519 -C "your.email@example.com"
-```
 
-> Press Enter to accept defaults. Leave passphrase empty for seamless pushes.
-
-### Step 3: Add Key to GitHub
-
-```bash
+# 3. Print public key
 cat ~/.ssh/id_ed25519.pub
 ```
 
-1. Copy the output.
-2. Go to GitHub → **Settings** → **SSH and GPG keys** → **New SSH key**.
-3. Paste key, label it (e.g., "Linux VM"), click **Add**.
-
-### Step 4: Test Connection
+Copy the key and add it to **GitHub → Settings → SSH and GPG keys → New SSH Key**.
 
 ```bash
+# 4. Verify connection
 ssh -T git@github.com
 ```
 
-Expected: `Hi username! You've successfully authenticated...`
-
 ---
 
-## Part 6: VS Code Development Suite
+## Part 6: VS Code Configuration
 
-### Launch VS Code in Project
+Launch VS Code in your workspace root:
 
 ```bash
 cd ~/workspace/rtl-dv-portfolio/sv-common-ip-library
@@ -259,19 +255,19 @@ code .
 
 ### Required Extensions
 
-Install via Extensions panel (`Ctrl+Shift+X`):
+Press `Ctrl + Shift + X` and install:
 
-| Extension                            | Publisher          | Purpose                                             |
-| ------------------------------------ | ------------------ | --------------------------------------------------- |
-| **SystemVerilog - Language Support** | mshr-h             | Syntax highlighting, auto-completion, file indexing |
-| **Verilog-HDL/SystemVerilog**        | LeafXia            | Background compiler integration                     |
-| **Verible**                          | Google             | Code formatting, linting, language server           |
-| **Draw.io Integration**              | Henning Dieterichs | Diagrams (save as `*.drawio.svg`)                   |
-| **vscode-icons**                     | VS Code Icons Team | File type icons in explorer                         |
+| Extension                        | Publisher        |
+| -------------------------------- | ---------------- |
+| SystemVerilog - Language Support | mshr-h           |
+| Verilog-HDL/SystemVerilog        | LeafXia          |
+| Verible                          | kukdh1           |
+| Draw.io Integration              | henningdietrichs |
+| vscode-icons                     | vscode-icons     |
 
-### Configure Verible Formatter in VS Code
+### Formatter Settings
 
-Open `settings.json` (`Ctrl+Shift+P` → "Open User Settings JSON") and add:
+Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)_) and add:
 
 ```json
 {
@@ -291,24 +287,8 @@ Create `.verilog_format` in your project root:
 --indentation_spaces 2
 --assignment_statement_alignment=align
 --case_items_alignment=align
---class_member_variable_alignment=align
---compact_indexing_and_selections=true
---distribution_items_alignment=align
---enum_assignment_statement_alignment=align
---expand_coverpoints=true
---formal_parameters_alignment=align
---formal_parameters_indentation=indent
---module_net_variable_alignment=align
---named_parameter_alignment=align
---named_parameter_indentation=indent
---named_port_alignment=align
---named_port_indentation=indent
 --port_declarations_alignment=align
---port_declarations_indentation=indent
---port_declarations_right_align_packed_dimensions=true
---port_declarations_right_align_unpacked_dimensions=true
---struct_union_members_alignment=align
---try_wrap_long_lines=false
+--formal_parameters_alignment=align
 ```
 
 ---
@@ -373,47 +353,58 @@ module counter_tb;
 endmodule
 ```
 
-### Step 2: Run Validation Commands
+### Step 2: Run Verification Workflow
+
+**Lint first:**
 
 ```bash
-# 1. Static lint check (must exit with zero warnings)
 verilator --lint-only -Wall counter.sv
+```
 
-# 2. Compile SV sources
+**Option A — Icarus Verilog:**
+
+```bash
+# Compile
+iverilog -g2012 -o counter_sim.out counter.sv counter_tb.sv
+
+# Simulate
+vvp counter_sim.out
+```
+
+**Option B — AMD Vivado (xsim):**
+
+```bash
+# Parse sources
 xvlog -sv counter.sv counter_tb.sv
 
-# 3. Elaborate
+# Elaborate snapshot
 xelab counter_tb -s smoke_snapshot
 
-# 4. Simulate
+# Simulate
 xsim smoke_snapshot -runall
 ```
 
-**Expected output:**
+### Step 3: View Waveforms
+
+```bash
+gtkwave waveform.vcd &
+```
+
+**Expected Output:**
 
 ```
 [SMOKE TEST SUCCESS] Counter final value: 19
 ```
 
-```bash
-# 5. View waveforms
-gtkwave waveform.vcd &
-```
-
-Drag the `count` signal into the waveform pane. Verify it counts from 0 to 19.
-
 ---
 
-## Quick Reference: Download Links
+## Quick Reference Links
 
-| Tool                   | Download URL                                      |
-| ---------------------- | ------------------------------------------------- |
-| VMware Workstation Pro | https://support.broadcom.com                      |
-| Ubuntu 22.04.5 LTS ISO | https://releases.ubuntu.com/jammy                 |
-| AMD Vivado ML Standard | https://www.xilinx.com/support/download.html      |
-| VS Code                | https://code.visualstudio.com/download            |
-| Verible                | https://github.com/chipsalliance/verible/releases |
-
----
-
-_Environment ready. Delete `smoke_test/` and begin Phase 0 IP development._
+| Resource               | Link                                                                                                                                    |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| WSL Documentation      | [Microsoft Learn WSL](https://learn.microsoft.com/en-us/windows/wsl/)                                                                   |
+| VMware Workstation Pro | [Broadcom Support Downloads](https://support.broadcom.com/security-advisory/security-advisory-detail.html?securit-advisory-id=SA230514) |
+| Ubuntu 22.04.5 LTS ISO | [Ubuntu Releases](https://releases.ubuntu.com/22.04/)                                                                                   |
+| Icarus Verilog Docs    | [Icarus Wiki](https://iverilog.fandom.com/wiki/Main_Page)                                                                               |
+| AMD Vivado ML Standard | [AMD Downloads](https://www.amd.com/en/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-2.html)                         |
+| Verible Releases       | [Chips Alliance GitHub](https://github.com/chipsalliance/verible/releases)                                                              |
