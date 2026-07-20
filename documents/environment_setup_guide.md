@@ -403,7 +403,7 @@ gtkwave waveform.vcd &
 | Resource               | Link                                                                                                                                    |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | WSL Documentation      | [Microsoft Learn WSL](https://learn.microsoft.com/en-us/windows/wsl/)                                                                   |
-| VMware Workstation Pro | [Downloads]([https://support.broadcom.com/security-advisory/security-advisory-detail.html?securit-advisory-id=SA230514](https://www.techpowerup.com/download/vmware-workstation-pro/)) |
+| VMware Workstation Pro | [Download From Here](https://www.techpowerup.com/download/vmware-workstation-pro/) |
 | Ubuntu 22.04.5 LTS ISO | [Ubuntu Releases](https://releases.ubuntu.com/22.04/)                                                                                   |
 | Icarus Verilog Docs    | [Icarus Wiki](https://iverilog.fandom.com/wiki/Main_Page)                                                                               |
 | AMD Vivado ML Standard | [AMD Downloads](https://www.amd.com/en/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-2.html)                         |
