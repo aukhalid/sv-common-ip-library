@@ -142,9 +142,11 @@ sudo mkdir -p /tools/Xilinx
 sudo chown -R $USER:$USER /tools/Xilinx
 
 # Copy installer from Windows Downloads to Linux Home
-cd ~
-cp /mnt/c/Users/$USER/Downloads/FPGAs_AdaptiveSoCs_Unified_*.bin .
+mkdir -p downloads
+```
+2. Go to your Downloads folder destination on you Windows. Then copy the Vivado .bin file, and then go to Linux > Ubuntu-22.04 > home > username > downloads and paste it there
 
+```bash
 # Grant execution permissions and run
 chmod +x FPGAs_AdaptiveSoCs_Unified_*.bin
 ./FPGAs_AdaptiveSoCs_Unified_*.bin
