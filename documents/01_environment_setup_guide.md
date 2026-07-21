@@ -50,10 +50,7 @@ dism /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 After rebooting, open **PowerShell as Administrator** and run:
 
 ```powershell
-# Install WSL Core Engine
-wsl --install
-
-# Download and register Ubuntu 22.04 LTS
+# Download and register WSL Ubuntu 22.04 LTS
 wsl --install -d Ubuntu-22.04
 ```
 
