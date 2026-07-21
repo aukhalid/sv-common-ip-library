@@ -475,6 +475,69 @@ chmod +x your_installer.bin
 ./your_installer.bin
 ```
 
+### Issue 3: VS Code `Exec format error` in WSL2
+
+**Error:**
+
+```
+/mnt/c/.../Code.exe: Exec format error
+```
+
+**Cause:** WSL's Interop service (`WSLInterop`) temporarily drops out. WSL uses this service to execute Windows `.exe` files from inside Linux, and when it drops, Linux treats `Code.exe` as an unrecognized binary.
+
+---
+
+#### Step 1: Re-register the WSL Interop Service
+
+Run this command in your WSL terminal to instantly re-enable Windows binary execution:
+
+```bash
+sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /proc/sys/fs/binfmt_misc/register'
+```
+
+Now try running `code .` again in your project directory. If it launches, you're good to go!
+
+---
+
+#### Step 2: Make the Fix Permanent (If Step 1 loses connection later)
+
+If this error keeps coming back after closing terminal sessions, make Linux automatically re-mount the Interop service on startup:
+
+**Create a persistent configuration file:**
+
+```bash
+sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /usr/lib/binfmt.d/WSLInterop.conf'
+```
+
+**Restart the binary format service:**
+
+```bash
+sudo systemctl restart systemd-binfmt
+```
+
+---
+
+#### Step 3: Full WSL Shutdown (Fallback)
+
+If the commands above don't immediately clear it, the WSL VM kernel service simply needs a quick refresh:
+
+1. Open **PowerShell** or **Command Prompt** in Windows _(not WSL)_.
+2. Run:
+   ```powershell
+   wsl --shutdown
+   ```
+3. Re-open your WSL terminal and try `code .` again.
+
+---
+
+#### Quick One-Liner (Emergency Fix)
+
+If you just need VS Code open _right now_ and don't want to reboot WSL:
+
+```bash
+sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /proc/sys/fs/binfmt_misc/register' && code .
+```
+
 ---
 
 ## Totally, Completely, Utterly OPTIONAL Nerdy Environment Setup
