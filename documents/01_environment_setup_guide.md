@@ -182,9 +182,7 @@ verible-verilog-format --version
 
 ---
 
-## Part 4: Environment & Workspace Setup
-
-### Step 1: Shell Configuration
+## Part 4: Environment Setup
 
 Open `~/.bashrc`:
 
