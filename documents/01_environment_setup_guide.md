@@ -41,18 +41,24 @@ After rebooting, open **PowerShell as Administrator** and run:
 wsl --install -d Ubuntu-22.04
 ```
 
+**Set your UNIX username and password when prompted**
+
+![Install WSL Core & Ubuntu 22.04 LTS](images/pwr_shell_2.png)
+
 > **Alternative:** If PowerShell encounters network limits, open the Microsoft Store app, search for **Ubuntu 22.04 LTS**, and click **Get / Install**.
 
 #### Step 4: Initialize Shell & Verify Graphics Pipeline (WSLg)
 
 1. Launch **Ubuntu 22.04 LTS** from the **Windows Start** Menu.
-2. Set your UNIX username and password when prompted.
-3. Test Windows GUI app integration:
+   ![Windows Start](images/ubuntu_start.png)
+2. Test Windows GUI app integration:
 
 ```bash
 sudo apt update && sudo apt install -y x11-apps
 xclock
 ```
+
+![Clock](images/clock.png)
 
 > A small analog clock window should open natively on your Windows desktop.
 
@@ -102,6 +108,7 @@ sudo apt install -y iverilog gtkwave verilator
 Skip if you are exclusively using Icarus Verilog (`iverilog`).
 
 1. Download [**Vivado 2024.2 ML Standard Edition (Linux Web Installer)**](https://www.amd.com/en/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-2.html) from AMD. Filename: `FPGAs_AdaptiveSoCs_Unified_2024.2_1113_2356_Lin64.bin`
+   ![Vivado](images/viva.png)
 2. Prepare target directories and copy the installer into the native Linux filesystem (to prevent NTFS permission blocks):
 
 ```bash
@@ -114,6 +121,7 @@ mkdir -p downloads
 ```
 
 2. Go to your Downloads folder destination on you Windows. Then copy the Vivado .bin file, and then go to Linux > Ubuntu-22.04 > home > username > downloads and paste it there
+   ![Linux Directory](images/linx_dir.png)
 
 ```bash
 # Grant execution permissions and run
@@ -127,6 +135,7 @@ chmod +x FPGAs_AdaptiveSoCs_Unified_*.bin
 - Uncheck everything that can be unchecked
 - Select FPGA Parts if needed
 - Set destination to `/tools/Xilinx`
+  ![Vivado Setup](images/viva2.png)
 
 **Install Cable Drivers:**
 
@@ -164,11 +173,22 @@ Save and exit (Ctrl + O, Enter, Ctrl + X). Reload the bash engine parameters imm
 source ~/.bashrc
 ```
 
----
+## ![Bashrc](images/bashrc.png)
 
 ## Part 5: Visual Studio Code
 
-> **WSL2 Users ONLY:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code, then click on **Get Started** and then **Connect to WSL with Distro**. Follow the Screenshots.
+### **WSL2 Users ONLY:**
+
+> Download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**.
+
+> Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code.
+
+> Click on **Get Started** and then **Connect to WSL using Distro**. Follow the Screenshots.
+
+> ![WSL Extention](images/wsl_ext.png)
+> ![WSL Extention](images/wsl_ext_2.png)
+
+### **Other Linux Users**
 
 ```bash
 # Clean conflicting legacy repos
@@ -240,7 +260,11 @@ verible-verilog-format --version
 
 ### Formatter Settings
 
-Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)_) and add:
+Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)_)
+
+![Setting](images/vs.png)
+
+Then add:
 
 ```json
 {
@@ -252,6 +276,8 @@ Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)
   "verilog-formatter.flagFile": ".verilog_format"
 }
 ```
+
+![Setting](images/vs1.png)
 
 Create `.verilog_format` in your project root:
 
@@ -280,7 +306,12 @@ ssh-keygen -t ed25519 -C "your.email@example.com"
 cat ~/.ssh/id_ed25519.pub
 ```
 
+![Git](images/git.png)
+
 Copy the key and add it to **GitHub → Settings → SSH and GPG keys → New SSH Key**.
+
+![Git](images/git2.png)
+![Git](images/git3.png)
 
 ```bash
 # 4. Verify connection
@@ -369,6 +400,7 @@ xelab counter_tb -s smoke_snapshot
 # Simulate
 xsim smoke_snapshot -runall
 ```
+![Final](images/final.png)
 
 **Option B — Icarus Verilog:**
 
