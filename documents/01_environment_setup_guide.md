@@ -50,7 +50,9 @@ wsl --install -d Ubuntu-22.04
 #### Step 4: Initialize Shell & Verify Graphics Pipeline (WSLg)
 
 1. Launch **Ubuntu 22.04 LTS** from the **Windows Start** Menu.
+
    ![Windows Start](images/ubuntu_start.png)
+
 2. Test Windows GUI app integration:
 
 ```bash
@@ -108,7 +110,9 @@ sudo apt install -y iverilog gtkwave verilator
 Skip if you are exclusively using Icarus Verilog (`iverilog`).
 
 1. Download [**Vivado 2024.2 ML Standard Edition (Linux Web Installer)**](https://www.amd.com/en/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-2.html) from AMD. Filename: `FPGAs_AdaptiveSoCs_Unified_2024.2_1113_2356_Lin64.bin`
+
    ![Vivado](images/viva.png)
+
 2. Prepare target directories and copy the installer into the native Linux filesystem (to prevent NTFS permission blocks):
 
 ```bash
@@ -120,7 +124,8 @@ sudo chown -R $USER:$USER /tools/Xilinx
 mkdir -p downloads
 ```
 
-2. Go to your Downloads folder destination on you Windows. Then copy the Vivado .bin file, and then go to Linux > Ubuntu-22.04 > home > username > downloads and paste it there
+2. Go to your Downloads folder destination on you Windows. Then copy the `FPGAs_AdaptiveSoCs_Unified_2024.2_1113_2356_Lin64.bin` file, and then go to **Linux > Ubuntu-22.04 > home > username > downloads** and paste it there
+
    ![Linux Directory](images/linx_dir.png)
 
 ```bash
@@ -135,6 +140,7 @@ chmod +x FPGAs_AdaptiveSoCs_Unified_*.bin
 - Uncheck everything that can be unchecked
 - Select FPGA Parts if needed
 - Set destination to `/tools/Xilinx`
+
   ![Vivado Setup](images/viva2.png)
 
 **Install Cable Drivers:**
@@ -264,7 +270,7 @@ Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)
 
 ![Setting](images/vs.png)
 
-Then add:
+**Then add:**
 
 ```json
 {
@@ -400,6 +406,7 @@ xelab counter_tb -s smoke_snapshot
 # Simulate
 xsim smoke_snapshot -runall
 ```
+
 ![Final](images/final.png)
 
 **Option B — Icarus Verilog:**
