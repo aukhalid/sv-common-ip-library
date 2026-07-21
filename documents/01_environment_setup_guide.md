@@ -110,26 +110,7 @@ sudo apt install -y libtinfo5 libncurses5 libncursesw5 libxrender1 \
 sudo apt install -y iverilog gtkwave verilator
 ```
 
-### Step 3: Visual Studio Code
-
-> **WSL2 Users ONLY:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code, then click on **Get Started** and then **Connect to WSL with Distro**. Follow the Screenshots.
-
-```bash
-# Clean conflicting legacy repos
-sudo rm -f /etc/apt/sources.list.d/vscode.list
-
-# Import Microsoft GPG key
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | \
-  gpg --dearmor | sudo tee /etc/apt/keyrings/packages.microsoft.gpg > /dev/null
-
-# Register official repository
-sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-
-# Install VS Code
-sudo apt update && sudo apt install -y code
-```
-
-### Step 4: AMD Vivado ML Standard
+### Step 3: AMD Vivado ML Standard
 
 Skip if you are exclusively using Icarus Verilog (`iverilog`).
 
@@ -165,37 +146,6 @@ chmod +x FPGAs_AdaptiveSoCs_Unified_*.bin
 cd /tools/Xilinx/Vivado/2024.2/data/xicom/cable_drivers/lin64/install_script/install_drivers/
 sudo ./install_drivers
 ```
-
-### Step 5: Verible Formatter
-
-```bash
-mkdir -p downloads
-cd ~/downloads
-
-# Get the tag name for the latest Verible release
-TAG=$(curl -s https://api.github.com/repos/chipsalliance/verible/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-
-# Download the static x86_64 tarball for Linux
-wget "https://github.com/chipsalliance/verible/releases/download/${TAG}/verible-${TAG}-linux-static-x86_64.tar.gz"
-
-# Extract the archive
-tar -xzf verible-*.tar.gz
-
-# Find the extracted directory name and enter it
-cd verible-*/
-
-# Copy all Verible tools (formatter, linter, language server, etc.) to system PATH
-sudo cp bin/* /usr/local/bin/
-
-# Return home and clean up the download folder
-cd ~
-rm -rf ~/downloads/verible-*
-
-# Verify installation
-verible-verilog-format --version
-```
-
----
 
 ## Part 4: Environment Setup
 
@@ -249,7 +199,26 @@ ssh -T git@github.com
 
 ---
 
-## Part 6: VS Code Configuration
+## Part 6: Visual Studio Code
+
+> **WSL2 Users ONLY:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code, then click on **Get Started** and then **Connect to WSL with Distro**. Follow the Screenshots.
+
+```bash
+# Clean conflicting legacy repos
+sudo rm -f /etc/apt/sources.list.d/vscode.list
+
+# Import Microsoft GPG key
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | \
+  gpg --dearmor | sudo tee /etc/apt/keyrings/packages.microsoft.gpg > /dev/null
+
+# Register official repository
+sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+
+# Install VS Code
+sudo apt update && sudo apt install -y code
+```
+
+## Part 7: VS Code Configuration
 
 Launch VS Code in your workspace root:
 
@@ -270,6 +239,39 @@ Press `Ctrl + Shift + X` and install:
 | Verible                          | kukdh1           |
 | Draw.io Integration              | henningdietrichs |
 | vscode-icons                     | vscode-icons     |
+
+---
+
+## Part 8: Verible Formatter
+
+```bash
+mkdir -p downloads
+cd ~/downloads
+
+# Get the tag name for the latest Verible release
+TAG=$(curl -s https://api.github.com/repos/chipsalliance/verible/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+# Download the static x86_64 tarball for Linux
+wget "https://github.com/chipsalliance/verible/releases/download/${TAG}/verible-${TAG}-linux-static-x86_64.tar.gz"
+
+# Extract the archive
+tar -xzf verible-*.tar.gz
+
+# Find the extracted directory name and enter it
+cd verible-*/
+
+# Copy all Verible tools (formatter, linter, language server, etc.) to system PATH
+sudo cp bin/* /usr/local/bin/
+
+# Return home and clean up the download folder
+cd ~
+rm -rf ~/downloads/verible-*
+
+# Verify installation
+verible-verilog-format --version
+```
+
+
 
 ### Formatter Settings
 
@@ -299,7 +301,7 @@ Create `.verilog_format` in your project root:
 
 ---
 
-## Part 7: Verification Smoke Test
+## Part 9: Verification Smoke Test
 
 ### Step 1: Create Test Files
 
@@ -487,7 +489,7 @@ chmod +x your_installer.bin
 
 ---
 
-## Totally, Completely OPTIONAL Nerdy Environment Setup
+## Totally, Completely, Utterly OPTIONAL Nerdy Environment Setup
 
 ### Final Setup
 
