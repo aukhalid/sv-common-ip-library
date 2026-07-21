@@ -1,4 +1,4 @@
-# Micro-Architecture & Verification Specification: Parameterized Single-Port RAM
+# Parameterized Single-Port RAM: Micro-Architecture & Verification Specification
 
 ## 1. Architectural Overview
 
@@ -19,54 +19,7 @@ In alignment with physical foundry constraints, this module is engineered as a s
 
 The operational block diagram highlights the isolation between the synthesizable control logic core and the external non-intrusive assertion probe layer:
 
-```text
-       +--------------------------------------------------------------+
-       | MODULE: single_port_ram                                      |
-       |                                                              |
-       |                   +-----------------------+                  |
------->| clk_i             |   Memory Core Matrix  |                  |
------->| rst_n_i           |                       |                  |
------->| wr_en_i           |   [DATA_WIDTH-1:0]    |                  |
------->| addr_i ---------->|   mem_core            |                  |
------->| wr_data_i ------->|   [0:MEM_DEPTH-1]     |                  |
-       |                   +-----------+-----------+                  |
-       |                               |                              |
-       |                               v                              |
-       |                   +-----------------------+                  |
-       |                   |  Write Mode Selector  |                  |
-       |                   |  (WF / RF / NC)       |                  |
-       |                   +-----------+-----------+                  |
-       |                               |                              |
-       |                               v                              |
-       |                   +-----------------------+                  |
-       |                   | ram_data_out Register |                  |
-       |                   +-----------+-----------+                  |
-       |                               |                              |
-       |                               +--------------+               |
-       |                               |              |               |
-       |                               v (OUT_REG=0)  v (OUT_REG=1)   |
-       |                           +-------+      +-------+           |
-       |                           | Bypass|      |Pipeline|          |
-       |                           +-------+      +-------+           |
-       |                               |              |               |
-       |                               v              v               |
-       |                           +-----------------------+          |
-       |                           |    Mux Multiplexer    |          |
-       |                           +-----------+-----------+          |
-       |                                       |                      |
-       |                                       v                      |
-<------| rd_data_o <---------------------------+                      |
-       |                                                              |
-       +--------------------------------------------------------------+
-                                       ^
-                                       | (Non-intrusive Monitoring via bind)
-       +-------------------------------+------------------------------+
-       | MODULE: ram_protocol_assertions                              |
-       | * ASSERT_NO_X (wr_en_i)                                      |
-       | * p_stable_addr_during_write                                 |
-       | * p_no_x_data_during_write                                   |
-       +--------------------------------------------------------------+
-```
+![single_port_ram](single_port_ram.svg)
 
 ## 3. Micro-Architectural Port & Parameter Specification
 
@@ -129,14 +82,3 @@ To optimize synthesis and preserve structural readability, the SystemVerilog Ass
 - **Back-to-Back Backlog Write/Read:** Push sequence steps writing random data patterns to address `0xAA` followed by an immediate read request to `0xAA`. Validate output values against the active `WRITE_MODE` parameters.
 - **Corner Boundary Operations:** Execute memory transactions at the absolute lowest address boundary (`0x00`) and the maximum upper threshold value limit ($2^{ADDR\_WIDTH}-1$) to test against accidental truncation.
 - **Randomized Stress Traffic Loops:** Fire high-density randomized bursts of read/write commands over 10,000 simulation clocks to drive the structural verification scoreboard metrics.
-
-### 6.2 Industrial Definition of Done Compliance Checklist
-
-- [ ] **Verilator Lint Cleanliness:** `verilator --lint-only -Wall` must exit with an absolute zero warning report. Unintentional transparent latches will trigger immediate pipeline rejection.
-- [ ] **Zero Area Synthesis Impact:** Synthesis logs must confirm that the SVA watchdogs were successfully stripped out by compiler optimization layers when simulation macros are de-asserted.
-- [ ] **100% Assertion Scoreboard Pass:** Zero protocol errors generated during the testbench regression runs.
-- [ ] **Functional Coverage Closure:** Verify that all combinations of write modes, reset states, pipeline depths, and address boundaries have been hit.
-
----
-
-_Specification file generated for `single_port_ram` IP block._
