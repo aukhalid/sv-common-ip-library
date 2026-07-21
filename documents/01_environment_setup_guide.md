@@ -170,11 +170,27 @@ sudo ./install_drivers
 ### Step 5: Verible Formatter
 
 ```bash
-cd ~/Downloads
-wget https://github.com/chipsalliance/verible/releases/download/v0.0-3644-g6c271816/verible-v0.0-3644-g6c271816-linux-static-x86_64.tar.gz
+mkdir -p downloads
+cd ~/downloads
 
+# Get the tag name for the latest Verible release
+TAG=$(curl -s https://api.github.com/repos/chipsalliance/verible/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+# Download the static x86_64 tarball for Linux
+wget "https://github.com/chipsalliance/verible/releases/download/${TAG}/verible-${TAG}-linux-static-x86_64.tar.gz"
+
+# Extract the archive
 tar -xzf verible-*.tar.gz
-sudo cp verible-*/bin/verible-verilog-format /usr/local/bin/
+
+# Find the extracted directory name and enter it
+cd verible-*/
+
+# Copy all Verible tools (formatter, linter, language server, etc.) to system PATH
+sudo cp bin/* /usr/local/bin/
+
+# Return home and clean up the download folder
+cd ~
+rm -rf ~/downloads/verible-*
 
 # Verify installation
 verible-verilog-format --version
