@@ -163,30 +163,9 @@ Save and exit (Ctrl + O, Enter, Ctrl + X). Reload the bash engine parameters imm
 source ~/.bashrc
 ```
 
-## Part 5: Secure GitHub Setup
-
-```bash
-# 1. Configure identity
-git config --global user.name "Your Name"
-git config --global user.email "your.email@example.com"
-
-# 2. Generate SSH Key
-ssh-keygen -t ed25519 -C "your.email@example.com"
-
-# 3. Print public key
-cat ~/.ssh/id_ed25519.pub
-```
-
-Copy the key and add it to **GitHub → Settings → SSH and GPG keys → New SSH Key**.
-
-```bash
-# 4. Verify connection
-ssh -T git@github.com
-```
-
 ---
 
-## Part 6: Visual Studio Code
+## Part 5: Visual Studio Code
 
 > **WSL2 Users ONLY:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code, then click on **Get Started** and then **Connect to WSL with Distro**. Follow the Screenshots.
 
@@ -205,7 +184,7 @@ sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packag
 sudo apt update && sudo apt install -y code
 ```
 
-## Part 7: VS Code Configuration
+## Part 6: VS Code Configuration
 
 Launch VS Code in your workspace root:
 
@@ -229,7 +208,7 @@ Press `Ctrl + Shift + X` and install:
 
 ---
 
-## Part 8: Verible Formatter
+## Part 7: Verible Formatter
 
 ```bash
 mkdir -p downloads
@@ -259,7 +238,6 @@ verible-verilog-format --version
 ```
 
 
-
 ### Formatter Settings
 
 Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)_) and add:
@@ -287,6 +265,29 @@ Create `.verilog_format` in your project root:
 ```
 
 ---
+
+## Part 8: Secure GitHub Setup
+
+```bash
+# 1. Configure identity
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# 2. Generate SSH Key
+ssh-keygen -t ed25519 -C "your.email@example.com"
+
+# 3. Print public key
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copy the key and add it to **GitHub → Settings → SSH and GPG keys → New SSH Key**.
+
+```bash
+# 4. Verify connection
+ssh -T git@github.com
+```
+---
+
 
 ## Part 9: Verification Smoke Test
 
