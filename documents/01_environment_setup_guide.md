@@ -4,19 +4,6 @@ A production-grade guide to setting up a Linux development environment for RTL D
 
 ---
 
-## Table of Contents
-
-1. [Part 1: Choosing Your Linux Platform](#part-1-choosing-your-linux-platform)
-2. [Part 2: Platform Deployment](#part-2-platform-deployment)
-3. [Part 3: Toolchain Installation](#part-3-toolchain-installation)
-4. [Part 4: Environment & Workspace Setup](#part-4-environment--workspace-setup)
-5. [Part 5: Secure GitHub Setup](#part-5-secure-github-setup)
-6. [Part 6: VS Code Configuration](#part-6-vs-code-configuration)
-7. [Part 7: Verification Smoke Test](#part-7-verification-smoke-test)
-8. [Quick Reference Links](#quick-reference-links)
-
----
-
 ## Part 1: Choosing Your Linux Platform
 
 | Method                 | Setup Complexity | Best Used For                                                                     |
