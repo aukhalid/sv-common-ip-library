@@ -414,3 +414,393 @@ gtkwave waveform.vcd &
 | Icarus Verilog Docs    | [Icarus Wiki](https://iverilog.fandom.com/wiki/Main_Page)                                                       |
 | AMD Vivado ML Standard | [AMD Downloads](https://www.amd.com/en/support/downloads/adaptive-socs-and-fpgas/development-tools/2024-2.html) |
 | Verible Releases       | [Chips Alliance GitHub](https://github.com/chipsalliance/verible/releases)                                      |
+
+---
+
+## Appendix: Troubleshooting & Known Fixes
+
+### Issue 1: Vivado Simulator (`xvlog`, `xelab`, `xsim`) Crashes with `std::runtime_error: locale`
+
+#### Symptoms
+
+When running Vivado tools inside a minimal Linux or WSL environment, execution aborts with errors such as:
+
+```text
+/bin/bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)
+terminate called after throwing an instance of 'std::runtime_error'
+  what(): locale::facet::_S_create_c_locale name not valid
+```
+
+#### Cause
+
+Vivado's underlying C++ runtime engine strictly requires the `en_US.UTF-8` locale. Minimal Ubuntu images (especially WSL) do not include pre-compiled English locale binary databases by default.
+
+#### Fix
+
+```bash
+# 1. Install locale packages and English language pack
+sudo apt update
+sudo apt install -y locales language-pack-en locales-all
+
+# 2. Re-generate glibc locale binary database
+sudo locale-gen en_US.UTF-8
+sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+sudo dpkg-reconfigure locales
+
+# 3. Add exports to ~/.bashrc (if not already present)
+echo 'export LANG=en_US.UTF-8' >> ~/.bashrc
+echo 'export LC_ALL=en_US.UTF-8' >> ~/.bashrc
+
+# 4. Reload active bash profile
+source ~/.bashrc
+```
+
+---
+
+### Issue 2: `chmod: changing permissions: Operation not permitted` on Windows Drives
+
+#### Symptoms
+
+Executing `chmod +x` on a file located in `/mnt/c/` throws a permission error:
+
+```text
+chmod: changing permissions of 'installer.bin': Operation not permitted
+```
+
+#### Cause
+
+Windows NTFS filesystems mounted under `/mnt/c/` do not natively map POSIX execution permission flags to Linux binaries.
+
+#### Fix
+
+Copy the installer into your native Linux home directory before granting execution rights:
+
+```bash
+# Copy file from Windows storage to Linux Home
+cp /mnt/c/Users/$USER/Downloads/your_installer.bin ~
+
+# Navigate to Home and grant permissions
+cd ~
+chmod +x your_installer.bin
+./your_installer.bin
+```
+
+---
+
+## Totally, Completely OPTIONAL Nerdy Environment Setup
+
+### Final Setup
+
+| Component | Choice                                 |
+| --------- | -------------------------------------- |
+| Terminal  | Windows Terminal                       |
+| Shell     | Bash                                   |
+| Font      | Cascadia Code                          |
+| Prompt    | Starship                               |
+| Theme     | Catppuccin Mocha                       |
+| Tools     | Git, tmux, fzf, bat, eza, zoxide, btop |
+
+---
+
+## 1. Update Ubuntu
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+---
+
+## 2. Install Base Packages
+
+```bash
+sudo apt install -y \
+git \
+curl \
+wget \
+zip \
+unzip \
+build-essential \
+tmux \
+ripgrep \
+fd-find \
+btop
+```
+
+---
+
+## 3. Install Starship
+
+```bash
+curl -sS https://starship.rs/install.sh | sh
+```
+
+Enable in Bash:
+
+```bash
+echo 'eval "$(starship init bash)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 4. Install eza
+
+```bash
+sudo mkdir -p /etc/apt/keyrings
+
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | \
+gpg --dearmor | sudo tee /etc/apt/keyrings/gierens.gpg >/dev/null
+
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | \
+sudo tee /etc/apt/sources.list.d/gierens.list
+
+sudo apt update
+sudo apt install eza
+```
+
+Aliases:
+
+```bash
+echo "alias ls='eza'" >> ~/.bashrc
+echo "alias ll='eza -lah'" >> ~/.bashrc
+echo "alias tree='eza --tree'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 5. Install zoxide
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+```
+
+Enable:
+
+```bash
+echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 6. Install fzf
+
+```bash
+sudo apt install -y fzf
+```
+
+---
+
+## 7. Install bat
+
+```bash
+sudo apt install -y bat
+```
+
+Alias:
+
+```bash
+echo "alias cat='batcat'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 8. Git Configuration
+
+```bash
+git config --global init.defaultBranch main
+git config --global pull.rebase false
+git config --global color.ui auto
+```
+
+---
+
+## 9. Windows Terminal Settings
+
+**Profile:** Ubuntu
+
+### Appearance
+
+- Font Face: `Cascadia Code`
+- Font Size: `13`
+- Cursor Shape: `Bar`
+- Acrylic: `On`
+- Opacity: `92%`
+
+### Color Scheme
+
+Recommended:
+
+- One Half Dark
+
+Alternatives:
+
+- Campbell
+- Ubuntu
+- Tango Dark
+
+---
+
+## Optional Fonts
+
+### Cascadia Code
+
+Already included with Windows 11.
+
+### JetBrains Mono Nerd Font
+
+Install if you want terminal icons (Starship, eza, etc.).
+
+Download from:
+
+https://www.nerdfonts.com/font-downloads
+
+Install all `.ttf` files and select **JetBrainsMono Nerd Font** in Windows Terminal.
+
+---
+
+## Recommended VS Code Extensions
+
+- GitLens
+- Error Lens
+- Markdown All in One
+- Material Icon Theme
+- Catppuccin Theme
+
+---
+
+## Disable VS Code Restricted Mode (Optional)
+
+Settings → Search **Workspace Trust**
+
+Disable:
+
+```
+Security › Workspace › Trust: Enabled
+```
+
+Or add to `settings.json`:
+
+```json
+"security.workspace.trust.enabled": false
+```
+
+## Useful Bash Aliases
+
+| Alias      | Expands To                           | Purpose                        |
+| ---------- | ------------------------------------ | ------------------------------ |
+| cls        | clear                                | Clear terminal                 |
+| ..         | cd ..                                | Up one directory               |
+| ...        | cd ../..                             | Up two directories             |
+| ....       | cd ../../..                          | Up three directories           |
+| home       | cd ~                                 | Go to home                     |
+| ws         | cd ~/workspace                       | Go to workspace                |
+| grep       | grep --color=auto                    | Colored grep output            |
+| ls         | eza                                  | Modern ls                      |
+| ll         | eza -lah                             | Detailed listing               |
+| la         | eza -a                               | Show hidden files              |
+| tree       | eza --tree                           | Tree view                      |
+| cat        | batcat                               | Syntax-highlighted cat         |
+| update     | sudo apt update && sudo apt upgrade  | Update system                  |
+| install    | sudo apt install                     | Short apt install              |
+| remove     | sudo apt remove                      | Short apt remove               |
+| autoremove | sudo apt autoremove -y               | Remove unused packages         |
+| c          | code .                               | Open current folder in VS Code |
+| reload     | source ~/.bashrc                     | Reload Bash config             |
+| h          | history                              | Show history                   |
+| ports      | ss -tuln                             | Show listening ports           |
+| dfh        | df -h                                | Disk usage                     |
+| duh        | du -sh \*                            | Folder sizes                   |
+| free       | free -h                              | Memory usage                   |
+| psg        | ps aux \| grep                       | Search processes               |
+| mkdirp     | mkdir -p                             | Create nested directories      |
+| g          | git                                  | Git shortcut                   |
+| gs         | git status                           | Git status                     |
+| ga         | git add                              | Stage files                    |
+| gaa        | git add .                            | Stage all                      |
+| gc         | git commit                           | Commit                         |
+| gcm        | git commit -m                        | Commit with message            |
+| gp         | git push                             | Push                           |
+| gpl        | git pull                             | Pull                           |
+| gl         | git log --oneline --graph --decorate | Compact history                |
+| gb         | git branch                           | List branches                  |
+| gco        | git checkout                         | Checkout                       |
+| gsw        | git switch                           | Switch branch                  |
+| gd         | git diff                             | Diff                           |
+| gr         | git restore                          | Restore file                   |
+| cleanpyc   | find . -name "\*.pyc" -delete        | Remove pyc files               |
+
+### Add all aliases
+
+Open `~/.bashrc`:
+
+```bash
+nano ~/.bashrc
+```
+
+Append the following to the end of `~/.bashrc`:
+
+```bash
+# Navigation
+alias cls='clear'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias home='cd ~'
+alias ws='cd ~/workspace'
+
+# File utilities
+alias ls='eza'
+alias ll='eza -lah'
+alias la='eza -a'
+alias tree='eza --tree'
+alias cat='batcat'
+alias grep='grep --color=auto'
+alias mkdirp='mkdir -p'
+
+# System
+alias update='sudo apt update && sudo apt upgrade'
+alias install='sudo apt install'
+alias remove='sudo apt remove'
+alias autoremove='sudo apt autoremove -y'
+alias ports='ss -tuln'
+alias dfh='df -h'
+alias duh='du -sh *'
+alias free='free -h'
+alias psg='ps aux | grep'
+
+# VS Code
+alias c='code .'
+alias reload='source ~/.bashrc'
+
+# History
+alias h='history'
+
+# Git
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gaa='git add .'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gl='git log --oneline --graph --decorate'
+alias gb='git branch'
+alias gco='git checkout'
+alias gsw='git switch'
+alias gd='git diff'
+alias gr='git restore'
+
+# Misc
+alias cleanpyc='find . -name "*.pyc" -delete'
+```
+
+Save and exit (Ctrl + O, Enter, Ctrl + X). Reload the bash engine parameters immediately:
+
+```bash
+source ~/.bashrc
+```
