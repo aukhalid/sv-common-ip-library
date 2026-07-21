@@ -115,7 +115,7 @@ sudo apt install -y iverilog gtkwave verilator
 
 ### Step 3: Visual Studio Code
 
-> **WSL2 Users:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code.
+> **WSL2 Users:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code, then click on **Get Started** and then **Connect to WSL**.
 
 ```bash
 # Clean conflicting legacy repos
