@@ -115,6 +115,8 @@ sudo apt install -y iverilog gtkwave verilator
 
 ### Step 3: Visual Studio Code
 
+> **WSL2 Users:** Skip the below step, download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code.
+
 ```bash
 # Clean conflicting legacy repos
 sudo rm -f /etc/apt/sources.list.d/vscode.list
@@ -129,8 +131,6 @@ sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packag
 # Install VS Code
 sudo apt update && sudo apt install -y code
 ```
-
-> **WSL2 Users:** Also download and install [**VS Code**](https://code.visualstudio.com/download?_exp_download=fb315fc982) on your **Windows host**. Install the **WSL extension** (`ms-vscode-remote.remote-wsl`) inside Windows VS Code.
 
 ### Step 4: AMD Vivado ML Standard
 
