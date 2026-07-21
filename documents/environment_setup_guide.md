@@ -213,15 +213,6 @@ Save and exit (Ctrl + O, Enter, Ctrl + X). Reload the bash engine parameters imm
 source ~/.bashrc
 ```
 
-### Step 2: Workspace Directory Initialization
-
-```bash
-mkdir -p ~/workspace/rtl-dv-projects/your-repo
-cd ~/workspace/rtl-dv-projects/your-repo
-```
-
----
-
 ## Part 5: Secure GitHub Setup
 
 ```bash
