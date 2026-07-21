@@ -532,7 +532,7 @@ btop
 ## 3. Install Starship
 
 ```bash
-curl -sS https://starship.rs/install.sh | sh
+curl -sS https://raw.githubusercontent.com/starship/starship/master/install/install.sh | sh
 ```
 
 Enable in Bash:
@@ -559,21 +559,13 @@ sudo apt update
 sudo apt install eza
 ```
 
-Aliases:
-
-```bash
-echo "alias ls='eza'" >> ~/.bashrc
-echo "alias ll='eza -lah'" >> ~/.bashrc
-echo "alias tree='eza --tree'" >> ~/.bashrc
-source ~/.bashrc
-```
-
 ---
 
 ## 5. Install zoxide
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+sudo apt update
+sudo apt install zoxide
 ```
 
 Enable:
@@ -618,33 +610,7 @@ git config --global color.ui auto
 
 ---
 
-## 9. Windows Terminal Settings
-
-**Profile:** Ubuntu
-
-### Appearance
-
-- Font Face: `Cascadia Code`
-- Font Size: `13`
-- Cursor Shape: `Bar`
-- Acrylic: `On`
-- Opacity: `92%`
-
-### Color Scheme
-
-Recommended:
-
-- One Half Dark
-
-Alternatives:
-
-- Campbell
-- Ubuntu
-- Tango Dark
-
----
-
-## Optional Fonts
+## Fonts
 
 ### Cascadia Code
 
