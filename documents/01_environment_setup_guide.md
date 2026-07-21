@@ -112,6 +112,7 @@ sudo chown -R $USER:$USER /tools/Xilinx
 # Copy installer from Windows Downloads to Linux Home
 mkdir -p downloads
 ```
+
 2. Go to your Downloads folder destination on you Windows. Then copy the Vivado .bin file, and then go to Linux > Ubuntu-22.04 > home > username > downloads and paste it there
 
 ```bash
@@ -237,7 +238,6 @@ rm -rf ~/downloads/verible-*
 verible-verilog-format --version
 ```
 
-
 ### Formatter Settings
 
 Open **User Settings (JSON)** (`Ctrl + Shift + P` → _Open User Settings (JSON)_) and add:
@@ -286,8 +286,8 @@ Copy the key and add it to **GitHub → Settings → SSH and GPG keys → New SS
 # 4. Verify connection
 ssh -T git@github.com
 ```
----
 
+---
 
 ## Part 9: Verification Smoke Test
 
