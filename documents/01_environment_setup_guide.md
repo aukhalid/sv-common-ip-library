@@ -252,6 +252,7 @@ ssh -T git@github.com
 Launch VS Code in your workspace root:
 
 ```bash
+mkdir -p workspace/rtl-dv-projects/your-repo
 cd ~/workspace/rtl-dv-projects/your-repo
 code .
 ```
