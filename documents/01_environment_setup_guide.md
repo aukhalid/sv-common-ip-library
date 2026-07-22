@@ -413,8 +413,8 @@ ssh -T git@github.com
 ### Step 1: Create Test Files
 
 ```bash
-mkdir -p ~/workspace/rtl-dv-portfolio/smoke_test
-cd ~/workspace/rtl-dv-portfolio/smoke_test
+mkdir -p ~/workspace/rtl-dv-porjects/smoke_test
+cd ~/workspace/rtl-dv-porjects/smoke_test
 ```
 
 **`counter.sv`**:
