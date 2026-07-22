@@ -529,7 +529,7 @@ PROGRAM_TCL := $(BUILD_DIR)/program_fpga.tcl
 # DEFAULT TARGET
 # ------------------------------------------------------------------------------
 .PHONY: all
-all: lint sim_iv
+all: lint sim
 
 # ------------------------------------------------------------------------------
 # 1. LINTING TARGETS
@@ -544,7 +544,7 @@ lint: ## Run Verilator static code analysis
 # ------------------------------------------------------------------------------
 # 2. SIMULATION TARGETS
 # ------------------------------------------------------------------------------
-.PHONY: sim_iv sim_xsim sim_only waves
+.PHONY: sim_iv sim sim_only waves
 
 sim_iv: lint ## Compile & run simulation via Icarus Verilog (Fast Baseline)
 	@echo "=== [SIM] Running Icarus Verilog Simulation ==="
@@ -552,7 +552,7 @@ sim_iv: lint ## Compile & run simulation via Icarus Verilog (Fast Baseline)
 	iverilog -g2012 -o $(SIM_BIN) $(RTL_SRCS) $(TB_SRCS)
 	vvp $(SIM_BIN)
 
-sim_xsim: lint ## Compile & run simulation via Vivado XSim
+sim: lint ## Compile & run simulation via Vivado XSim
 	@echo "=== [SIM] Running Vivado XSim Simulation ==="
 	@mkdir -p $(BUILD_DIR)
 	xvlog -sv $(RTL_SRCS) $(TB_SRCS)
@@ -572,11 +572,11 @@ waves: ## Open simulation waveform in GTKWave
 # ------------------------------------------------------------------------------
 # 3. SYNTHESIS & HARDWARE BUILD TARGETS
 # ------------------------------------------------------------------------------
-.PHONY: synth_only bitstream
+.PHONY: synth bitstream
 
-synth_only: lint $(BUILD_TCL) ## Run Vivado Synthesis only (Check utilization & gate mapping)
+synth: lint $(BUILD_TCL) ## Run Vivado Synthesis only (Check utilization & gate mapping)
 	@echo "=== [SYNTH] Running Vivado Batch Synthesis ==="
-	vivado -mode batch -nojournal -nolog -source $(BUILD_DIR)/synth_only.tcl
+	vivado -mode batch -nojournal -nolog -source $(BUILD_DIR)/synth.tcl
 
 bitstream: lint $(BUILD_TCL) ## Full Vivado Flow: Synthesis -> Place & Route -> Bitstream
 	@echo "=== [BUILD] Running Full Hardware Generation Pipeline ==="
@@ -584,20 +584,6 @@ bitstream: lint $(BUILD_TCL) ## Full Vivado Flow: Synthesis -> Place & Route -> 
 
 # ------------------------------------------------------------------------------
 # 4. FPGA PROGRAMMING TARGET
-# ------------------------------------------------------------------------------
-# IMPORTANT STEP-BY-STEP WORKFLOW BEFORE RUNNING 'make program':
-#
-# 1. Plug in your Artix-7 FPGA USB cable to your laptop and power it ON.
-# 2. Open Windows PowerShell as Administrator and check USB BUSID:
-#       usbipd list
-# 3. Bind the USB port (Only needed once per port):
-#       usbipd bind --busid <BUSID>
-# 4. Attach the USB port to WSL2:
-#       usbipd attach --wsl --busid <BUSID>
-# 5. Verify in Linux terminal that the FTDI/Digilent JTAG interface is visible:
-#       lsusb
-# 6. Execute programming command:
-#       make program
 # ------------------------------------------------------------------------------
 .PHONY: program
 program: $(PROGRAM_TCL) ## Download generated bitstream into connected FPGA via JTAG
@@ -626,12 +612,12 @@ $(BUILD_TCL):
 	@echo "write_bitstream -force ./$(OUT_BIT)" >> $(BUILD_TCL)
 	@echo "exit 0" >> $(BUILD_TCL)
 
-	@echo "# Synth-only helper script" > $(BUILD_DIR)/synth_only.tcl
-	@echo "create_project -force synth_proj ./$(BUILD_DIR)/vivado_proj -part $(FPGA_PART)" >> $(BUILD_DIR)/synth_only.tcl
-	@echo "add_files [list $(RTL_SRCS)]" >> $(BUILD_DIR)/synth_only.tcl
-	@echo "synth_design -top $(TOP_RTL) -part $(FPGA_PART)" >> $(BUILD_DIR)/synth_only.tcl
-	@echo "report_utilization -file ./$(BUILD_DIR)/synth_utilization.rpt" >> $(BUILD_DIR)/synth_only.tcl
-	@echo "exit 0" >> $(BUILD_DIR)/synth_only.tcl
+	@echo "# Synth-only helper script" > $(BUILD_DIR)/synth.tcl
+	@echo "create_project -force synth_proj ./$(BUILD_DIR)/vivado_proj -part $(FPGA_PART)" >> $(BUILD_DIR)/synth.tcl
+	@echo "add_files [list $(RTL_SRCS)]" >> $(BUILD_DIR)/synth.tcl
+	@echo "synth_design -top $(TOP_RTL) -part $(FPGA_PART)" >> $(BUILD_DIR)/synth.tcl
+	@echo "report_utilization -file ./$(BUILD_DIR)/synth_utilization.rpt" >> $(BUILD_DIR)/synth.tcl
+	@echo "exit 0" >> $(BUILD_DIR)/synth.tcl
 
 $(PROGRAM_TCL):
 	@mkdir -p $(BUILD_DIR)
@@ -745,10 +731,10 @@ Once the FPGA is attached to WSL2, navigate to your project directory containing
 make lint
 
 # 2. Run simulation testbench
-make sim_xsim
+make sim
 
 # 3. Synthesize design to evaluate resource utilization
-make synth_only
+make synth
 
 # 4. Generate bitstream (Non-interactive Vivado batch mode)
 make bitstream
@@ -759,18 +745,18 @@ make program
 
 ### Summary of Makefile Commands
 
-| Command           | Action                                                                     |
-| :---------------- | :------------------------------------------------------------------------- |
-| `make all`        | Runs linting and fast Icarus Verilog simulation.                           |
-| `make lint`       | Runs Verilator static analysis to catch logic warnings.                    |
-| `make sim_iv`     | Compiles and executes simulation using Icarus Verilog.                     |
-| `make sim_xsim`   | Compiles and executes simulation using Vivado XSim.                        |
-| `make waves`      | Opens generated `.vcd` file in GTKWave.                                    |
-| `make synth_only` | Runs Vivado synthesis in batch mode and generates `synth_utilization.rpt`. |
-| `make bitstream`  | Runs full Vivado pipeline (Synth > Place > Route > Bitstream).             |
-| `make program`    | Scans JTAG bus inside WSL2 and programs the attached Artix-7 board.        |
-| `make clean`      | Purges all build outputs, temporary Vivado logs, and VCD waveforms.        |
-| `make help`       | Displays interactive target descriptions.                                  |
+| Command          | Action                                                                     |
+| :--------------- | :------------------------------------------------------------------------- |
+| `make all`       | Runs linting and fast Icarus Verilog simulation.                           |
+| `make lint`      | Runs Verilator static analysis to catch logic warnings.                    |
+| `make sim_iv`    | Compiles and executes simulation using Icarus Verilog.                     |
+| `make sim`       | Compiles and executes simulation using Vivado XSim.                        |
+| `make waves`     | Opens generated `.vcd` file in GTKWave.                                    |
+| `make synth`     | Runs Vivado synthesis in batch mode and generates `synth_utilization.rpt`. |
+| `make bitstream` | Runs full Vivado pipeline (Synth > Place > Route > Bitstream).             |
+| `make program`   | Scans JTAG bus inside WSL2 and programs the attached Artix-7 board.        |
+| `make clean`     | Purges all build outputs, temporary Vivado logs, and VCD waveforms.        |
+| `make help`      | Displays interactive target descriptions.                                  |
 
 ---
 
