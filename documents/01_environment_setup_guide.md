@@ -505,14 +505,6 @@ endmodule
 Save this file as `Makefile` in your project root directory (alongside `counter.sv` and `counter_tb.sv`).
 
 ```makefile
-# ==============================================================================
-# UNIFIED RTL & FPGA HARDWARE AUTOMATION MAKEFILE
-# ==============================================================================
-# Target Device : AMD/Xilinx Artix-7 (e.g., Basys 3 / Arty A7)
-# Toolchain     : Verilator, Icarus Verilog, AMD Vivado Batch Mode
-# Operating Env : WSL2 (Ubuntu 22.04 LTS)
-# ==============================================================================
-
 # ------------------------------------------------------------------------------
 # PROJECT CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -570,7 +562,12 @@ sim_xsim: lint ## Compile & run simulation via Vivado XSim
 sim_only: sim_iv ## Alias for fast simulation
 
 waves: ## Open simulation waveform in GTKWave
-	@if [ -f $(WAVE_VCD) ]; then 		echo "=== [GUI] Launching GTKWave ==="; 		gtkwave $(WAVE_VCD) & 	else 		echo "[ERROR] Waveform file $(WAVE_VCD) not found. Run 'make sim_iv' first."; 	fi
+	@if [ -f $(WAVE_VCD) ]; then \
+		echo "=== [GUI] Launching GTKWave ==="; \
+		gtkwave $(WAVE_VCD) & \
+	else \
+		echo "[ERROR] Waveform file $(WAVE_VCD) not found. Run 'make sim_iv' first."; \
+	fi
 
 # ------------------------------------------------------------------------------
 # 3. SYNTHESIS & HARDWARE BUILD TARGETS
@@ -604,7 +601,10 @@ bitstream: lint $(BUILD_TCL) ## Full Vivado Flow: Synthesis -> Place & Route -> 
 # ------------------------------------------------------------------------------
 .PHONY: program
 program: $(PROGRAM_TCL) ## Download generated bitstream into connected FPGA via JTAG
-	@if [ ! -f $(OUT_BIT) ]; then 		echo "[ERROR] Bitstream $(OUT_BIT) not found! Run 'make bitstream' first."; 		exit 1; 	fi
+	@if [ ! -f $(OUT_BIT) ]; then \
+		echo "[ERROR] Bitstream $(OUT_BIT) not found! Run 'make bitstream' first."; \
+		exit 1; \
+	fi
 	@echo "=== [HW] Programming FPGA Target via Vivado Hardware Manager ==="
 	vivado -mode batch -nojournal -nolog -source $(PROGRAM_TCL)
 
