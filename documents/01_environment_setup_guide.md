@@ -608,32 +608,36 @@ chmod +x your_installer.bin
 
 ---
 
-#### Step 1: Re-register the WSL Interop Service
+#### Re-register the WSL Interop Service
 
 Run this command in your WSL terminal to instantly re-enable Windows binary execution:
 
 ```bash
-sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /proc/sys/fs/binfmt_misc/register'
+sudo tee /etc/systemd/system/wsl-interop-fix.service > /dev/null << 'EOF'
+[Unit]
+Description=Re-register WSLInterop binfmt handler
+After=systemd-binfmt.service
+Wants=systemd-binfmt.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'echo ":WSLInterop:M::MZ::/init:PF" > /proc/sys/fs/binfmt_misc/register'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable wsl-interop-fix.service
+sudo systemctl start wsl-interop-fix.service
 ```
 
-Now try running `code .` again in your project directory. If it launches, you're good to go!
-
----
-
-#### Step 2: Make the Fix Permanent (If Step 1 loses connection later)
-
-If this error keeps coming back after closing terminal sessions, make Linux automatically re-mount the Interop service on startup:
-
-**Create a persistent configuration file:**
+Check:
 
 ```bash
-sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /usr/lib/binfmt.d/WSLInterop.conf'
-```
-
-**Restart the binary format service:**
-
-```bash
-sudo systemctl restart systemd-binfmt
+ls /proc/sys/fs/binfmt_misc/
+code .
 ```
 
 ---
