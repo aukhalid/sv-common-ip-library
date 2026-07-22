@@ -72,17 +72,22 @@ sim: setup
 	@if [ -n "$(strip $(PKG_SRCS))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(PKG_SRCS); fi
 	@if [ -n "$(strip $(IF_SRCS))" ];   then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(IF_SRCS); fi
 	@if [ -n "$(strip $(ASRT_SRCS))" ]; then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(ASRT_SRCS); fi
+	@echo "=== [SIM SUCCESS] Packages & Infrastructure Compiling Done ==="
 	@echo "=== [SIM] Compiling Design RTL ==="
 	@if [ -n "$(strip $(RTL_SRCS))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(RTL_SRCS)); fi
+	@echo "=== [SIM SUCCESS] Design RTL Compiling Done ==="
 	@echo "=== [SIM] Compiling Testbench Suite ==="
 	@if [ -n "$(strip $(TB_PKG))" ];    then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(TB_PKG)); fi
 	@if [ -n "$(strip $(BIND_SRC))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(BIND_SRC)); fi
 	@if [ -n "$(strip $(TB_TOP))" ];    then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(TB_TOP)); fi
+	@echo "=== [SIM SUCCESS] Testbench Suite Compiling Done ==="
 	@echo "=== [SIM] Elaborating & Running Simulation ==="
 	@cd $(BUILD_DIR) && xelab $(SIM_TOP) -s $(SNAPSHOT) -debug typical
+	@echo "=== [SIM SUCCESS] Elaboration Done ==="
+	@echo "=== [SIM] Running Simulation Execution ==="
 	@cd $(BUILD_DIR) && xsim $(SNAPSHOT) -runall
 	@if [ -f $(BUILD_DIR)/dump.vcd ]; then mv $(BUILD_DIR)/dump.vcd $(VCD_FILE); fi
-	@echo "=== [SIM SUCCESS] Waveform saved to $(VCD_FILE) ==="
+	@echo "=== [SIM SUCCESS] Simulation Completed & Waveform saved to $(VCD_FILE) ==="
 
 # ------------------------------------------------------------------------------
 # 6. Waveform GUI Viewer Target (GTKWave)

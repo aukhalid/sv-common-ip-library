@@ -16,8 +16,6 @@ module single_port_ram #(
     int ADDR_WIDTH = 8,    // Address bus width (Depth = 2^ADDR_WIDTH)
     bit OUT_REG    = 1'b0, // 0 = Unregistered (1 cycle latency), 1 = Registered (2 cycle latency)
     int WRITE_MODE = 0     // 0 = WRITE_FIRST (Read-Through-Write)
-
-
 ) (
     input  logic                  clk_i,
     input  logic                  rst_n_i,
@@ -101,6 +99,7 @@ module single_port_ram #(
         addr_i
     );
   endproperty
+
   assert property (p_stable_addr_during_write)
   else
     $error("[PROTOCOL VIOLATION] Time: %0t | addr_i contains X/Z bits during active write!", $time);
@@ -111,6 +110,7 @@ module single_port_ram #(
         wr_data_i
     );
   endproperty
+
   assert property (p_no_x_data_during_write)
   else
     $error("[DATA VIOLATION] Time: %0t | wr_data_i contains X/Z bits during active write!", $time);
