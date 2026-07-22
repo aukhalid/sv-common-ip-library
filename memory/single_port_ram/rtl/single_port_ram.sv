@@ -14,6 +14,10 @@
 //                 global reset; only the output register is cleared.
 //=============================================================================
 
+// ==============================================================================
+// MODULE: single_port_ram
+// ==============================================================================
+
 module single_port_ram #(
     int                      DATA_WIDTH = memory_pkg::RAM_DEFAULT_DATA_WIDTH,
     int                      ADDR_WIDTH = memory_pkg::RAM_DEFAULT_ADDR_WIDTH,
@@ -28,44 +32,27 @@ module single_port_ram #(
     output logic [DATA_WIDTH-1:0] rd_data_o
 );
 
+  import memory_pkg::*;
 
-  // 1. Local Parameters & Structural Matrix Definitions
-
-  // Deriving memory depth locally
   localparam int DEPTH = 1 << ADDR_WIDTH;
-
-  // Unpacked 2D dense register matrix array mapping the physical memory grid
   logic [DATA_WIDTH-1:0] mem_core[DEPTH];
-
-  // Internal intermediate signals for multi-mode block routing
   logic [DATA_WIDTH-1:0] ram_data_out;
   logic [DATA_WIDTH-1:0] ram_data_reg;
 
-
-  // 2. Synchronous Core Memory Read/Write Control Loop
   always_ff @(posedge clk_i) begin
-    if (wr_en_i) begin
-      mem_core[addr_i] <= wr_data_i;
-    end
+    if (wr_en_i) mem_core[addr_i] <= wr_data_i;
   end
 
-  // Read Data Selection mapping
   always_ff @(posedge clk_i) begin
     if (!rst_n_i) begin
       ram_data_out <= '0;
     end else begin
       if (wr_en_i) begin
         case (WRITE_MODE)
-          // WRITE_FIRST: Newly written data flows straight to output
-          memory_pkg::WRITE_FIRST: ram_data_out <= wr_data_i;
-
-          // READ_FIRST: Output holds the old data present before write
-          memory_pkg::READ_FIRST: ram_data_out <= mem_core[addr_i];
-
-          // NO_CHANGE: Output data bus latches its previous read value
-          memory_pkg::NO_CHANGE: ram_data_out <= ram_data_out;
-
-          default: ram_data_out <= wr_data_i;  // Default to WRITE_FIRST behavior
+          WRITE_FIRST: ram_data_out <= wr_data_i;
+          READ_FIRST:  ram_data_out <= mem_core[addr_i];
+          NO_CHANGE:   ram_data_out <= ram_data_out;
+          default:     ram_data_out <= wr_data_i;
         endcase
       end else begin
         ram_data_out <= mem_core[addr_i];
@@ -73,18 +60,38 @@ module single_port_ram #(
     end
   end
 
-
-  // 3. Optional Output Pipelined Target Stage
   always_ff @(posedge clk_i) begin
-    if (!rst_n_i) begin
-      ram_data_reg <= '0;
-    end else begin
-      ram_data_reg <= ram_data_out;
-    end
+    if (!rst_n_i) ram_data_reg <= '0;
+    else ram_data_reg <= ram_data_out;
   end
 
-  // Continuous assignment mapping
   assign rd_data_o = (OUT_REG) ? ram_data_reg : ram_data_out;
 
+
+  // `ifdef SIMULATION
+
+  //   // 1. Concurrent Guard: Catch X/Z states on the Control Line
+  //   `ASSERT_NO_X(clk, wr_en, "Target block wr_en line resolved to an unknown X state")
+
+  //   // 2. Protocol Guard: Ensure address stability during active writes
+  //   property p_stable_addr_during_write;
+  //     @(posedge clk) disable iff (!rst_n) wr_en |-> !$isunknown(
+  //         addr
+  //     );
+  //   endproperty
+  //   assert property (p_stable_addr_during_write)
+  //   else
+  //     $error("[PROTOCOL VIOLATION] Input address contains X/Z bits during an active write command!");
+
+  //   // 3. Data Guard: Catch non-deterministic data streams during writes
+  //   property p_no_x_data_during_write;
+  //     @(posedge clk) disable iff (!rst_n) wr_en |-> !$isunknown(
+  //         wr_data
+  //     );
+  //   endproperty
+  //   assert property (p_no_x_data_during_write)
+  //   else $error("[DATA VIOLATION] Incoming write data bus contains non-deterministic X/Z bits!");
+
+  // `endif
 
 endmodule : single_port_ram
