@@ -408,7 +408,39 @@ ssh -T git@github.com
 
 ---
 
-## Part 9: Verification Smoke Test
+## Part 9: FPGA Hardware Setup Guide
+
+Follow this guide to enable USB pass-through from Windows to WSL2, allowing Vivado inside Linux to program your physical Artix-7 board via USB JTAG.
+
+### Step 1: Install `usbipd-win` on Windows
+
+1. Open **PowerShell as Administrator** in Windows.
+2. Install the `usbipd` package using Windows Package Manager (`winget`):
+   ```powershell
+   winget install --exact --id dorssel.usbipd-win
+   ```
+3. Close the PowerShell window and **restart your computer**.
+
+---
+
+### Step 2: Install USBIP User-Space Tools inside WSL2 Ubuntu
+
+Open your **Ubuntu WSL2 terminal** and execute:
+
+```bash
+# 1. Update package registry
+sudo apt update
+
+# 2. Install Linux USB utilities
+sudo apt install -y linux-tools-virtual hwdata
+
+# 3. Register the usbip binary location
+sudo update-alternatives --install /usr/local/bin/usbip usbip $(ls /usr/lib/linux-tools/*/usbip | tail -n1) 20
+```
+
+---
+
+## Part 10: Verification Smoke Test
 
 ### Step 1: Create Test Files
 
@@ -468,50 +500,244 @@ module counter_tb;
 endmodule
 ```
 
-### Step 2: Run Verification Workflow
+### Step 2: Unified Master Makefile
 
-**Lint first:**
+Save this file as `Makefile` in your project root directory (alongside `counter.sv` and `counter_tb.sv`).
 
-```bash
-verilator --lint-only -Wall counter.sv
+```makefile
+# ==============================================================================
+# UNIFIED RTL & FPGA HARDWARE AUTOMATION MAKEFILE
+# ==============================================================================
+# Target Device : AMD/Xilinx Artix-7 (e.g., Basys 3 / Arty A7)
+# Toolchain     : Verilator, Icarus Verilog, AMD Vivado Batch Mode
+# Operating Env : WSL2 (Ubuntu 22.04 LTS)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# PROJECT CONFIGURATION
+# ------------------------------------------------------------------------------
+TOP_RTL     ?= counter
+TOP_TB      ?= counter_tb
+FPGA_PART   ?= xc7a35tcpg236-1# Default: Digilent Basys 3 (Artix-7)
+
+RTL_SRCS    := counter.sv
+TB_SRCS     := counter_tb.sv
+CONSTR_SRCS := constraints.xdc
+
+BUILD_DIR   := build
+OUT_BIT     := $(BUILD_DIR)/$(TOP_RTL).bit
+SIM_BIN     := $(BUILD_DIR)/sim.out
+WAVE_VCD    := waveform.vcd
+
+# TCL Script Generation Targets
+BUILD_TCL   := $(BUILD_DIR)/build_bitstream.tcl
+PROGRAM_TCL := $(BUILD_DIR)/program_fpga.tcl
+
+# ------------------------------------------------------------------------------
+# DEFAULT TARGET
+# ------------------------------------------------------------------------------
+.PHONY: all
+all: lint sim_iv
+
+# ------------------------------------------------------------------------------
+# 1. LINTING TARGETS
+# ------------------------------------------------------------------------------
+.PHONY: lint
+lint: ## Run Verilator static code analysis
+	@echo "=== [LINT] Running Verilator Static Analysis ==="
+	@mkdir -p $(BUILD_DIR)
+	verilator --lint-only -Wall $(RTL_SRCS)
+	@echo "[LINT SUCCESS] No structural or logic warnings detected."
+
+# ------------------------------------------------------------------------------
+# 2. SIMULATION TARGETS
+# ------------------------------------------------------------------------------
+.PHONY: sim_iv sim_xsim sim_only waves
+
+sim_iv: lint ## Compile & run simulation via Icarus Verilog (Fast Baseline)
+	@echo "=== [SIM] Running Icarus Verilog Simulation ==="
+	@mkdir -p $(BUILD_DIR)
+	iverilog -g2012 -o $(SIM_BIN) $(RTL_SRCS) $(TB_SRCS)
+	vvp $(SIM_BIN)
+
+sim_xsim: lint ## Compile & run simulation via Vivado XSim
+	@echo "=== [SIM] Running Vivado XSim Simulation ==="
+	@mkdir -p $(BUILD_DIR)
+	xvlog -sv $(RTL_SRCS) $(TB_SRCS)
+	xelab $(TOP_TB) -s smoke_snapshot
+	xsim smoke_snapshot -runall
+
+sim_only: sim_iv ## Alias for fast simulation
+
+waves: ## Open simulation waveform in GTKWave
+	@if [ -f $(WAVE_VCD) ]; then 		echo "=== [GUI] Launching GTKWave ==="; 		gtkwave $(WAVE_VCD) & 	else 		echo "[ERROR] Waveform file $(WAVE_VCD) not found. Run 'make sim_iv' first."; 	fi
+
+# ------------------------------------------------------------------------------
+# 3. SYNTHESIS & HARDWARE BUILD TARGETS
+# ------------------------------------------------------------------------------
+.PHONY: synth_only bitstream
+
+synth_only: lint $(BUILD_TCL) ## Run Vivado Synthesis only (Check utilization & gate mapping)
+	@echo "=== [SYNTH] Running Vivado Batch Synthesis ==="
+	vivado -mode batch -nojournal -nolog -source $(BUILD_DIR)/synth_only.tcl
+
+bitstream: lint $(BUILD_TCL) ## Full Vivado Flow: Synthesis -> Place & Route -> Bitstream
+	@echo "=== [BUILD] Running Full Hardware Generation Pipeline ==="
+	vivado -mode batch -nojournal -nolog -source $(BUILD_TCL)
+
+# ------------------------------------------------------------------------------
+# 4. FPGA PROGRAMMING TARGET
+# ------------------------------------------------------------------------------
+# IMPORTANT STEP-BY-STEP WORKFLOW BEFORE RUNNING 'make program':
+#
+# 1. Plug in your Artix-7 FPGA USB cable to your laptop and power it ON.
+# 2. Open Windows PowerShell as Administrator and check USB BUSID:
+#       usbipd list
+# 3. Bind the USB port (Only needed once per port):
+#       usbipd bind --busid <BUSID>
+# 4. Attach the USB port to WSL2:
+#       usbipd attach --wsl --busid <BUSID>
+# 5. Verify in Linux terminal that the FTDI/Digilent JTAG interface is visible:
+#       lsusb
+# 6. Execute programming command:
+#       make program
+# ------------------------------------------------------------------------------
+.PHONY: program
+program: $(PROGRAM_TCL) ## Download generated bitstream into connected FPGA via JTAG
+	@if [ ! -f $(OUT_BIT) ]; then 		echo "[ERROR] Bitstream $(OUT_BIT) not found! Run 'make bitstream' first."; 		exit 1; 	fi
+	@echo "=== [HW] Programming FPGA Target via Vivado Hardware Manager ==="
+	vivado -mode batch -nojournal -nolog -source $(PROGRAM_TCL)
+
+# ------------------------------------------------------------------------------
+# 5. HELPER TCL SCRIPT GENERATORS (AUTOMATICALLY GENERATED)
+# ------------------------------------------------------------------------------
+$(BUILD_TCL):
+	@mkdir -p $(BUILD_DIR)
+	@echo "# Automatically generated by Makefile" > $(BUILD_TCL)
+	@echo "create_project -force synth_proj ./$(BUILD_DIR)/vivado_proj -part $(FPGA_PART)" >> $(BUILD_TCL)
+	@echo "add_files [list $(RTL_SRCS)]" >> $(BUILD_TCL)
+	@if [ -f $(CONSTR_SRCS) ]; then echo "add_files -fileset constrs_1 [list $(CONSTR_SRCS)]" >> $(BUILD_TCL); fi
+	@echo "synth_design -top $(TOP_RTL) -part $(FPGA_PART)" >> $(BUILD_TCL)
+	@echo "opt_design" >> $(BUILD_TCL)
+	@echo "place_design" >> $(BUILD_TCL)
+	@echo "route_design" >> $(BUILD_TCL)
+	@echo "report_timing_summary -file ./$(BUILD_DIR)/timing_summary.rpt" >> $(BUILD_TCL)
+	@echo "report_utilization -file ./$(BUILD_DIR)/utilization.rpt" >> $(BUILD_TCL)
+	@echo "write_bitstream -force ./$(OUT_BIT)" >> $(BUILD_TCL)
+	@echo "exit 0" >> $(BUILD_TCL)
+
+	@echo "# Synth-only helper script" > $(BUILD_DIR)/synth_only.tcl
+	@echo "create_project -force synth_proj ./$(BUILD_DIR)/vivado_proj -part $(FPGA_PART)" >> $(BUILD_DIR)/synth_only.tcl
+	@echo "add_files [list $(RTL_SRCS)]" >> $(BUILD_DIR)/synth_only.tcl
+	@echo "synth_design -top $(TOP_RTL) -part $(FPGA_PART)" >> $(BUILD_DIR)/synth_only.tcl
+	@echo "report_utilization -file ./$(BUILD_DIR)/synth_utilization.rpt" >> $(BUILD_DIR)/synth_only.tcl
+	@echo "exit 0" >> $(BUILD_DIR)/synth_only.tcl
+
+$(PROGRAM_TCL):
+	@mkdir -p $(BUILD_DIR)
+	@echo "# Automatically generated by Makefile" > $(PROGRAM_TCL)
+	@echo "open_hw_manager" >> $(PROGRAM_TCL)
+	@echo "connect_hw_server -allow_non_jtag" >> $(PROGRAM_TCL)
+	@echo "open_hw_target" >> $(PROGRAM_TCL)
+	@echo "set target_device [lindex [get_hw_devices] 0]" >> $(PROGRAM_TCL)
+	@echo "current_hw_device \$$target_device" >> $(PROGRAM_TCL)
+	@echo "refresh_hw_device -update_hw_probes false \$$target_device" >> $(PROGRAM_TCL)
+	@echo "set_property PROGRAM.FILE ./$(OUT_BIT) \$$target_device" >> $(PROGRAM_TCL)
+	@echo "program_hw_devices \$$target_device" >> $(PROGRAM_TCL)
+	@echo "close_hw_target" >> $(PROGRAM_TCL)
+	@echo "close_hw_manager" >> $(PROGRAM_TCL)
+	@echo "exit 0" >> $(PROGRAM_TCL)
+
+# ------------------------------------------------------------------------------
+# 6. CLEANUP & HELP TARGETS
+# ------------------------------------------------------------------------------
+.PHONY: clean help
+
+clean: ## Remove generated build files, simulation outputs, and vivado logs
+	@echo "=== [CLEAN] Removing Build Artifacts ==="
+	rm -rf $(BUILD_DIR) xsim.dir .Xil *.jou *.log *.pb *.out *.vcd smoke_snapshot
+	@echo "[CLEAN COMPLETE]"
+
+help: ## Show this interactive help message
+	@echo "========================================================================"
+	@echo " AUTOMATED RTL & FPGA DEVELOPMENT TOOLCHAIN HELP"
+	@echo "========================================================================"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf " [36m%-15s [0m %s
+", $$1, $$2}'
 ```
 
-**Option A — AMD Vivado (xsim):**
+---
+
+### Step 3: Connect, Bind, and Attach the FPGA Board
+
+Execute this sequence **every time you reconnect your FPGA board or reboot your laptop**:
+
+1. **Plug in Board:** Connect your Artix-7 FPGA board (e.g., Basys 3, Arty A7) to your laptop via USB and toggle the power switch ON.
+2. **Identify BUSID (Windows PowerShell):** Open **PowerShell as Administrator** and list connected USB devices:
+
+   ```powershell
+   usbipd list
+   ```
+
+   _Look for your board listed under `DEVICE` (e.g., `FTDI USB Serial Converter` or `Digilent USB Device`). Note its **BUSID** (e.g., `2-3`)._
+
+3. **Bind the USB Port (Windows PowerShell — Only needed once per port):**
+   ```powershell
+   usbipd bind --busid 2-3
+   ```
+4. **Attach to WSL2 (Windows PowerShell):**
+   ```powershell
+   usbipd attach --wsl --busid 2-3
+   ```
+5. **Verify Hardware Access (Ubuntu WSL2 Terminal):** Switch to your Linux terminal and list attached USB devices:
+   ```bash
+   lsusb
+   ```
+   _You should see a line representing your FTDI / Digilent JTAG device (e.g., `Bus 001 Device 002: ID 0403:6010 Future Technology Devices International, Ltd FT2232C/D/H Dual UART/FIFO IC`)._
+
+---
+
+### Step 4: Automated Execution Workflow
+
+Once the FPGA is attached to WSL2, navigate to your project directory containing your source code and `Makefile`:
 
 ```bash
-# Parse sources
-xvlog -sv counter.sv counter_tb.sv
+# 1. Run static linting
+make lint
 
-# Elaborate snapshot
-xelab counter_tb -s smoke_snapshot
+# 2. Run simulation testbench (Icarus Verilog)
+make sim_iv
 
-# Simulate
-xsim smoke_snapshot -runall
+# 3. Synthesize design to evaluate resource utilization
+make synth_only
+
+# 4. Generate bitstream (Non-interactive Vivado batch mode)
+make bitstream
+
+# 5. Program physical Artix-7 board
+make program
 ```
+
+### Summary of Makefile Commands
+
+| Command             | Action                                                                     |
+| :------------------ | :------------------------------------------------------------------------- |
+| `make` / `make all` | Runs linting and fast Icarus Verilog simulation.                           |
+| `make lint`         | Runs Verilator static analysis to catch logic warnings.                    |
+| `make sim_iv`       | Compiles and executes simulation using Icarus Verilog.                     |
+| `make sim_xsim`     | Compiles and executes simulation using Vivado XSim.                        |
+| `make waves`        | Opens generated `.vcd` file in GTKWave.                                    |
+| `make synth_only`   | Runs Vivado synthesis in batch mode and generates `synth_utilization.rpt`. |
+| `make bitstream`    | Runs full Vivado pipeline (Synth $                                         |
+
+ightarrow$ Place $
+ightarrow$ Route $
+ightarrow$ Bitstream). |
+| `make program` | Scans JTAG bus inside WSL2 and programs the attached Artix-7 board. |
+| `make clean` | Purges all build outputs, temporary Vivado logs, and VCD waveforms. |
+| `make help` | Displays interactive target descriptions. |
 
 ![Final](images/final.png)
-
-**Option B — Icarus Verilog:**
-
-```bash
-# Compile
-iverilog -g2012 -o counter_sim.out counter.sv counter_tb.sv
-
-# Simulate
-vvp counter_sim.out
-```
-
-### Step 3: View Waveforms
-
-```bash
-gtkwave waveform.vcd &
-```
-
-**Expected Output:**
-
-```
-[SMOKE TEST SUCCESS] Counter final value: 19
-```
 
 ---
 
