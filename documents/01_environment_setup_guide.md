@@ -4,6 +4,88 @@ A production-grade guide to setting up a Linux development environment for RTL D
 
 ---
 
+## Toolkit Overview
+
+| Tool / Component                  | Purpose                                                                                              |
+| :-------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **WSL2**                          | Windows Subsystem for Linux - lightweight Linux environment on Windows with seamless GUI integration |
+| **VMware Workstation Pro**        | Full virtual machine isolation with dedicated resources for Linux development                        |
+| **Ubuntu 22.04 LTS**              | Stable Long-Term Support Linux distribution used as the base OS                                      |
+| **AMD Vivado ML Standard 2024.2** | AMD's commercial FPGA design and simulation suite (xsim, xvlog, xelab)                               |
+| **iverilog**                      | Open-source Verilog / SystemVerilog simulator (Icarus Verilog)                                       |
+| **gtkwave**                       | Open-source VCD waveform viewer for simulation debug                                                 |
+| **verilator**                     | Fast open-source Verilog / SystemVerilog linter and cycle-accurate simulator                         |
+| **VS Code**                       | Lightweight, extensible code editor with remote development support                                  |
+
+---
+
+## Table of Contents
+
+- [RTL Design \& Verification - Complete Environment Setup Guide](#rtl-design--verification---complete-environment-setup-guide)
+  - [Toolkit Overview](#toolkit-overview)
+  - [Table of Contents](#table-of-contents)
+  - [Part 1: Choosing Your Linux Platform](#part-1-choosing-your-linux-platform)
+  - [Part 2: Platform Deployment](#part-2-platform-deployment)
+    - [Option A: WSL2 Deployment (Recommended)](#option-a-wsl2-deployment-recommended)
+      - [Step 1: Enable Windows Virtualization Subsystems via DISM](#step-1-enable-windows-virtualization-subsystems-via-dism)
+      - [Step 2: System Reboot (Mandatory)](#step-2-system-reboot-mandatory)
+      - [Step 3: Install WSL Core \& Ubuntu 22.04 LTS](#step-3-install-wsl-core--ubuntu-2204-lts)
+      - [Step 4: Initialize Shell \& Verify Graphics Pipeline (WSLg)](#step-4-initialize-shell--verify-graphics-pipeline-wslg)
+    - [Option B: VMware Workstation Deployment](#option-b-vmware-workstation-deployment)
+    - [Option C: Native/Dual-Boot Deployment](#option-c-nativedual-boot-deployment)
+  - [Part 3: Toolchain Installation](#part-3-toolchain-installation)
+    - [Step 1: Base System Update \& Build Tools](#step-1-base-system-update--build-tools)
+    - [Step 2: Open-Source EDA Tools](#step-2-open-source-eda-tools)
+    - [Step 3: AMD Vivado ML Standard](#step-3-amd-vivado-ml-standard)
+  - [Part 4: Environment Setup](#part-4-environment-setup)
+  - [](#)
+  - [Part 5: Visual Studio Code](#part-5-visual-studio-code)
+    - [**WSL2 Users ONLY:**](#wsl2-users-only)
+    - [**Other Linux Users**](#other-linux-users)
+  - [Part 6: VS Code Configuration](#part-6-vs-code-configuration)
+    - [Required Extensions](#required-extensions)
+  - [Part 7: Verible Formatter](#part-7-verible-formatter)
+    - [Formatter Settings](#formatter-settings)
+  - [Part 8: Secure GitHub Setup](#part-8-secure-github-setup)
+  - [Part 9: Verification Smoke Test](#part-9-verification-smoke-test)
+    - [Step 1: Create Test Files](#step-1-create-test-files)
+    - [Step 2: Run Verification Workflow](#step-2-run-verification-workflow)
+    - [Step 3: View Waveforms](#step-3-view-waveforms)
+  - [Quick Reference Links](#quick-reference-links)
+  - [Troubleshooting \& Known Fixes](#troubleshooting--known-fixes)
+    - [Issue 1: Vivado Simulator (`xvlog`, `xelab`, `xsim`) Crashes with `std::runtime_error: locale`](#issue-1-vivado-simulator-xvlog-xelab-xsim-crashes-with-stdruntime_error-locale)
+      - [Symptoms](#symptoms)
+      - [Cause](#cause)
+      - [Fix](#fix)
+    - [Issue 2: `chmod: changing permissions: Operation not permitted` on Windows Drives](#issue-2-chmod-changing-permissions-operation-not-permitted-on-windows-drives)
+      - [Symptoms](#symptoms-1)
+      - [Cause](#cause-1)
+      - [Fix](#fix-1)
+    - [Issue 3: VS Code `Exec format error` in WSL2](#issue-3-vs-code-exec-format-error-in-wsl2)
+      - [Step 1: Re-register the WSL Interop Service](#step-1-re-register-the-wsl-interop-service)
+      - [Step 2: Make the Fix Permanent (If Step 1 loses connection later)](#step-2-make-the-fix-permanent-if-step-1-loses-connection-later)
+      - [Step 3: Full WSL Shutdown (Fallback)](#step-3-full-wsl-shutdown-fallback)
+      - [Quick One-Liner (Emergency Fix)](#quick-one-liner-emergency-fix)
+  - [Totally, Completely, Utterly OPTIONAL Nerdy Environment Setup](#totally-completely-utterly-optional-nerdy-environment-setup)
+    - [Setup Goal](#setup-goal)
+    - [1. Update Ubuntu](#1-update-ubuntu)
+    - [2. Install Base Packages](#2-install-base-packages)
+    - [3. Install Starship](#3-install-starship)
+    - [4. Install eza](#4-install-eza)
+    - [5. Install zoxide](#5-install-zoxide)
+    - [6. Install fzf](#6-install-fzf)
+    - [7. Install bat](#7-install-bat)
+    - [8. Git Configuration](#8-git-configuration)
+    - [Fonts](#fonts)
+    - [Cascadia Code](#cascadia-code)
+    - [JetBrains Mono Nerd Font](#jetbrains-mono-nerd-font)
+    - [Recommended VS Code Extensions](#recommended-vs-code-extensions)
+    - [Disable VS Code Restricted Mode (Optional)](#disable-vs-code-restricted-mode-optional)
+    - [Useful Bash Aliases](#useful-bash-aliases)
+    - [Add all aliases](#add-all-aliases)
+
+---
+
 ## Part 1: Choosing Your Linux Platform
 
 | Method                 | Setup Complexity | Best Used For                                                                     |
@@ -446,7 +528,7 @@ gtkwave waveform.vcd &
 
 ---
 
-## Appendix: Troubleshooting & Known Fixes
+## Troubleshooting & Known Fixes
 
 ### Issue 1: Vivado Simulator (`xvlog`, `xelab`, `xsim`) Crashes with `std::runtime_error: locale`
 
@@ -581,7 +663,7 @@ sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /proc/sys/fs/binfmt_misc/regist
 
 ## Totally, Completely, Utterly OPTIONAL Nerdy Environment Setup
 
-### Final Setup
+### Setup Goal
 
 | Component | Choice                                 |
 | --------- | -------------------------------------- |
@@ -594,7 +676,7 @@ sudo sh -c 'echo ":WSLInterop:M::MZ::/init:PF" > /proc/sys/fs/binfmt_misc/regist
 
 ---
 
-## 1. Update Ubuntu
+### 1. Update Ubuntu
 
 ```bash
 sudo apt update
@@ -603,7 +685,7 @@ sudo apt upgrade -y
 
 ---
 
-## 2. Install Base Packages
+### 2. Install Base Packages
 
 ```bash
 sudo apt install -y \
@@ -621,7 +703,7 @@ btop
 
 ---
 
-## 3. Install Starship
+### 3. Install Starship
 
 ```bash
 curl -sS https://raw.githubusercontent.com/starship/starship/master/install/install.sh | sh
@@ -636,7 +718,7 @@ source ~/.bashrc
 
 ---
 
-## 4. Install eza
+### 4. Install eza
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
@@ -653,7 +735,7 @@ sudo apt install eza
 
 ---
 
-## 5. Install zoxide
+### 5. Install zoxide
 
 ```bash
 sudo apt update
@@ -669,7 +751,7 @@ source ~/.bashrc
 
 ---
 
-## 6. Install fzf
+### 6. Install fzf
 
 ```bash
 sudo apt install -y fzf
@@ -677,7 +759,7 @@ sudo apt install -y fzf
 
 ---
 
-## 7. Install bat
+### 7. Install bat
 
 ```bash
 sudo apt install -y bat
@@ -692,7 +774,7 @@ source ~/.bashrc
 
 ---
 
-## 8. Git Configuration
+### 8. Git Configuration
 
 ```bash
 git config --global init.defaultBranch main
@@ -702,7 +784,7 @@ git config --global color.ui auto
 
 ---
 
-## Fonts
+### Fonts
 
 ### Cascadia Code
 
@@ -720,7 +802,7 @@ Install all `.ttf` files and select **JetBrainsMono Nerd Font** in Windows Termi
 
 ---
 
-## Recommended VS Code Extensions
+### Recommended VS Code Extensions
 
 - GitLens
 - Error Lens
@@ -730,7 +812,7 @@ Install all `.ttf` files and select **JetBrainsMono Nerd Font** in Windows Termi
 
 ---
 
-## Disable VS Code Restricted Mode (Optional)
+### Disable VS Code Restricted Mode (Optional)
 
 Settings → Search **Workspace Trust**
 
@@ -746,7 +828,7 @@ Or add to `settings.json`:
 "security.workspace.trust.enabled": false
 ```
 
-## Useful Bash Aliases
+### Useful Bash Aliases
 
 | Alias      | Expands To                           | Purpose                        |
 | ---------- | ------------------------------------ | ------------------------------ |
