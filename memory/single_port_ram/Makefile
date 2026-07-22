@@ -61,7 +61,8 @@ setup:
 # ------------------------------------------------------------------------------
 lint:
 	@echo "=== [LINT] Running Verilator Static Analysis for $(shell basename $(PWD)) ==="
-	verilator $(VERILATOR_FLAGS) $(PKG_SRCS) $(RTL_SRCS) $(ASRT_SRCS)
+	@verilator $(VERILATOR_FLAGS) $(PKG_SRCS) $(RTL_SRCS) $(ASRT_SRCS) && \
+	echo "=== [LINT SUCCESS] Zero errors/warnings found for $(shell basename $(PWD))! ==="
 
 # ------------------------------------------------------------------------------
 # 5. Simulation Target (Guarded Multi-Stage XSim Compilation)

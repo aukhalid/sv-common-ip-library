@@ -7,8 +7,8 @@
 
 
 class ram_transaction #(
-    int DATA_WIDTH = memory_pkg::RAM_DEFAULT_DATA_WIDTH,
-    int ADDR_WIDTH = memory_pkg::RAM_DEFAULT_ADDR_WIDTH
+    int DATA_WIDTH = 32,
+    int ADDR_WIDTH = 32
 );
 
   rand logic wr_en;
