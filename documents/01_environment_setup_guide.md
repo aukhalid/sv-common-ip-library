@@ -667,7 +667,47 @@ help: ## Show this interactive help message
 
 ---
 
-### Step 3: Connect, Bind, and Attach the FPGA Board
+### Step 3: Add Constraints File
+
+**`constraints.xdc`**:
+
+```constraints
+set_property PACKAGE_PIN W5 [get_ports clk_i]
+set_property IOSTANDARD LVCMOS33 [get_ports clk_i]
+create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk_i]
+
+set_property PACKAGE_PIN U18 [get_ports rst_n_i]
+set_property IOSTANDARD LVCMOS33 [get_ports rst_n_i]
+
+set_property PACKAGE_PIN V17 [get_ports wr_en_i]
+set_property IOSTANDARD LVCMOS33 [get_ports wr_en_i]
+
+set_property PACKAGE_PIN U16 [get_ports {count_o[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[0]}]
+
+set_property PACKAGE_PIN E19 [get_ports {count_o[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[1]}]
+
+set_property PACKAGE_PIN U19 [get_ports {count_o[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[2]}]
+
+set_property PACKAGE_PIN V19 [get_ports {count_o[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[3]}]
+
+set_property PACKAGE_PIN W18 [get_ports {count_o[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[4]}]
+
+set_property PACKAGE_PIN U15 [get_ports {count_o[5]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[5]}]
+
+set_property PACKAGE_PIN U14 [get_ports {count_o[6]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[6]}]
+
+set_property PACKAGE_PIN V14 [get_ports {count_o[7]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {count_o[7]}]
+```
+
+### Step 4: Connect, Bind, and Attach the FPGA Board
 
 Execute this sequence **every time you reconnect your FPGA board or reboot your laptop**:
 
@@ -696,7 +736,7 @@ Execute this sequence **every time you reconnect your FPGA board or reboot your 
 
 ---
 
-### Step 4: Automated Execution Workflow
+### Step 5: Automated Execution Workflow
 
 Once the FPGA is attached to WSL2, navigate to your project directory containing your source code and `Makefile`:
 
@@ -704,8 +744,8 @@ Once the FPGA is attached to WSL2, navigate to your project directory containing
 # 1. Run static linting
 make lint
 
-# 2. Run simulation testbench (Icarus Verilog)
-make sim_iv
+# 2. Run simulation testbench
+make sim_xsim
 
 # 3. Synthesize design to evaluate resource utilization
 make synth_only
@@ -719,24 +759,18 @@ make program
 
 ### Summary of Makefile Commands
 
-| Command             | Action                                                                     |
-| :------------------ | :------------------------------------------------------------------------- |
-| `make` / `make all` | Runs linting and fast Icarus Verilog simulation.                           |
-| `make lint`         | Runs Verilator static analysis to catch logic warnings.                    |
-| `make sim_iv`       | Compiles and executes simulation using Icarus Verilog.                     |
-| `make sim_xsim`     | Compiles and executes simulation using Vivado XSim.                        |
-| `make waves`        | Opens generated `.vcd` file in GTKWave.                                    |
-| `make synth_only`   | Runs Vivado synthesis in batch mode and generates `synth_utilization.rpt`. |
-| `make bitstream`    | Runs full Vivado pipeline (Synth $                                         |
-
-ightarrow$ Place $
-ightarrow$ Route $
-ightarrow$ Bitstream). |
-| `make program` | Scans JTAG bus inside WSL2 and programs the attached Artix-7 board. |
-| `make clean` | Purges all build outputs, temporary Vivado logs, and VCD waveforms. |
-| `make help` | Displays interactive target descriptions. |
-
-![Final](images/final.png)
+| Command           | Action                                                                     |
+| :---------------- | :------------------------------------------------------------------------- |
+| `make all`        | Runs linting and fast Icarus Verilog simulation.                           |
+| `make lint`       | Runs Verilator static analysis to catch logic warnings.                    |
+| `make sim_iv`     | Compiles and executes simulation using Icarus Verilog.                     |
+| `make sim_xsim`   | Compiles and executes simulation using Vivado XSim.                        |
+| `make waves`      | Opens generated `.vcd` file in GTKWave.                                    |
+| `make synth_only` | Runs Vivado synthesis in batch mode and generates `synth_utilization.rpt`. |
+| `make bitstream`  | Runs full Vivado pipeline (Synth > Place > Route > Bitstream).             |
+| `make program`    | Scans JTAG bus inside WSL2 and programs the attached Artix-7 board.        |
+| `make clean`      | Purges all build outputs, temporary Vivado logs, and VCD waveforms.        |
+| `make help`       | Displays interactive target descriptions.                                  |
 
 ---
 
