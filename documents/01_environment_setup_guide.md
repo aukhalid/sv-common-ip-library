@@ -948,7 +948,7 @@ alias gcl='git clone'
 alias cleanpyc='find . -name "*.pyc" -delete'
 ```
 
-Save and exit (Ctrl + O, Enter, Ctrl + X). Reload the bash engine parameters immediately:
+Save and exit (Ctrl + O, Enter, Ctrl + X). Reload the bash engine:
 
 ```bash
 source ~/.bashrc
