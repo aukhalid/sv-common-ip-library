@@ -942,6 +942,7 @@ alias gco='git checkout'
 alias gsw='git switch'
 alias gd='git diff'
 alias gr='git restore'
+alias gcl='git clone'
 
 # Misc
 alias cleanpyc='find . -name "*.pyc" -delete'
