@@ -662,8 +662,7 @@ help: ## Show this interactive help message
 	@echo "========================================================================"
 	@echo " AUTOMATED RTL & FPGA DEVELOPMENT TOOLCHAIN HELP"
 	@echo "========================================================================"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf " [36m%-15s [0m %s
-", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 ```
 
 ---
