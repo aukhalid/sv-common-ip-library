@@ -413,8 +413,8 @@ ssh -T git@github.com
 ### Step 1: Create Test Files
 
 ```bash
-mkdir -p ~/workspace/rtl-dv-porjects/smoke_test
-cd ~/workspace/rtl-dv-porjects/smoke_test
+mkdir -p ~/workspace/rtl-dv-projects/smoke_test
+cd ~/workspace/rtl-dv-projects/smoke_test
 ```
 
 **`counter.sv`**:
@@ -895,8 +895,8 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias hm='cd ~'
 alias ws='cd ~/workspace'
-alias pj='cd ~/workspace/rtl-dv-porjects'
-alias cip='cd ~/workspace/rtl-dv-porjects/sv-common-ip-library'
+alias pj='cd ~/workspace/rtl-dv-projects'
+alias cip='cd ~/workspace/rtl-dv-projects/sv-common-ip-library'
 
 # File utilities
 alias ls='eza'
