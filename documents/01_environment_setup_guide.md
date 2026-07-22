@@ -885,12 +885,14 @@ Append the following to the end of `~/.bashrc`:
 
 ```bash
 # Navigation
-alias cls='clear'
+alias clr='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-alias home='cd ~'
+alias hm='cd ~'
 alias ws='cd ~/workspace'
+alias pj='cd ~/workspace/rtl-dv-porjects'
+alias cip='cd ~/workspace/rtl-dv-porjects/sv-common-ip-library'
 
 # File utilities
 alias ls='eza'
@@ -899,10 +901,11 @@ alias la='eza -a'
 alias tree='eza --tree'
 alias cat='batcat'
 alias grep='grep --color=auto'
-alias mkdirp='mkdir -p'
+alias md='mkdir -p'
 
 # System
-alias update='sudo apt update && sudo apt upgrade'
+alias update='sudo apt update'
+alias upgrade='sudo apt update && sudo apt upgrade'
 alias install='sudo apt install'
 alias remove='sudo apt remove'
 alias autoremove='sudo apt autoremove -y'
@@ -915,6 +918,7 @@ alias psg='ps aux | grep'
 # VS Code
 alias c='code .'
 alias reload='source ~/.bashrc'
+alias brc='nano ~/.bashrc'
 
 # History
 alias h='history'
