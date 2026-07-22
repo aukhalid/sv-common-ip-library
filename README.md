@@ -1,5 +1,9 @@
 # sv-common-ip-library
 
+## Evnironment Setup
+
+[Environment Setup](documents/01_environment_setup_guide.md)
+
 ## 📁 Project Structure
 
 ```
