@@ -453,7 +453,7 @@ cd ~/workspace/rtl-dv-projects/smoke_test
 
 ```systemverilog
 module counter #(
-    parameter WIDTH = 8
+    parameter int WIDTH = 8
 )(
     input  logic             clk_i,
     input  logic             rst_n_i,
