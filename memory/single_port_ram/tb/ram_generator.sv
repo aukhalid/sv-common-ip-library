@@ -6,15 +6,15 @@
 // ==============================================================================
 
 class ram_generator #(
-    int DATA_WIDTH = memory_pkg::RAM_DEFAULT_DATA_WIDTH,
-    int ADDR_WIDTH = memory_pkg::RAM_DEFAULT_ADDR_WIDTH
+    int DATA_WIDTH = 32,
+    int ADDR_WIDTH = 32
 );
 
   // Instance of the transaction class to generate random transactions
   ram_transaction #(
       .DATA_WIDTH(DATA_WIDTH),
       .ADDR_WIDTH(ADDR_WIDTH)
-  ) transaction;
+  ) trans;
 
   mailbox #(ram_transaction #(
       .DATA_WIDTH(DATA_WIDTH),
@@ -30,7 +30,6 @@ class ram_generator #(
           .ADDR_WIDTH(ADDR_WIDTH)
       )) gen2drv_mbx,
       event gen_done);
-
     this.gen2drv_mbx = gen2drv_mbx;
     this.gen_done = gen_done;
   endfunction : new
@@ -39,11 +38,11 @@ class ram_generator #(
   task run();
     $display("[GENERATOR] Time = %0t: Starting %d random transactions", $time, num_transactions);
     repeat (num_transactions) begin
-      transaction = new();
-      if (!transaction.randomize()) begin
+      trans = new();
+      if (!trans.randomize()) begin
         $fatal("[GENERATOR ERROR] Time = %0t: Randomization failed for transaction", $time);
       end
-      gen2drv_mbx.put(transaction);
+      gen2drv_mbx.put(trans);
     end
     ->gen_done;
     $display("[GENERATOR] Time = %0t: Finished generating %d random transactions", $time,

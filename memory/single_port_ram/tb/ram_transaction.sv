@@ -5,10 +5,9 @@
 // ASSET       : Random Transaction Data Model Container Class
 // ==============================================================================
 
-
 class ram_transaction #(
-    int DATA_WIDTH = memory_pkg::RAM_DEFAULT_DATA_WIDTH,
-    int ADDR_WIDTH = memory_pkg::RAM_DEFAULT_ADDR_WIDTH
+    int DATA_WIDTH = 32,
+    int ADDR_WIDTH = 32
 );
 
   rand logic wr_en;
@@ -26,7 +25,7 @@ class ram_transaction #(
   }
 
   function void display_transaction();
-    $display("Transaction: wr_en=%0b, addr=%0h, wr_data=%0h, rd_data=%0h", wr_en, addr, wr_data,
+    $display("[Transaction]: wr_en=%0b, addr=%0h, wr_data=%0h, rd_data=%0h", wr_en, addr, wr_data,
              rd_data);
   endfunction : display_transaction
 endclass : ram_transaction

@@ -6,8 +6,8 @@
 // ==============================================================================
 
 class ram_driver #(
-    int DATA_WIDTH = memory_pkg::RAM_DEFAULT_DATA_WIDTH,
-    int ADDR_WIDTH = memory_pkg::RAM_DEFAULT_ADDR_WIDTH
+    int DATA_WIDTH = 32,
+    int ADDR_WIDTH = 32
 );
 
   virtual clk_rst_if.slave clk_rst_vif;
@@ -52,12 +52,12 @@ class ram_driver #(
       ram_transaction #(
           .DATA_WIDTH(DATA_WIDTH),
           .ADDR_WIDTH(ADDR_WIDTH)
-      ) transaction;
-      gen2drv_mbx.get(transaction);
+      ) trans;
+      gen2drv_mbx.get(trans);
 
-      mem_vif.wr_en <= transaction.wr_en;
-      mem_vif.addr <= transaction.addr;
-      mem_vif.wr_data <= transaction.wr_data;
+      mem_vif.wr_en <= trans.wr_en;
+      mem_vif.addr <= trans.addr;
+      mem_vif.wr_data <= trans.wr_data;
 
       @(posedge clk_rst_vif.clk);
       $display("[DRIVER] Time = %0t: Transaction received and applied", $time);
