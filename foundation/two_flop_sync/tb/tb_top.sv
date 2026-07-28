@@ -12,7 +12,7 @@ module tb_top;
   // Local Parameter Definitions
   // ----------------------------------------------------------------------------
   localparam int WIDTH = 4;
-  localparam logic [WIDTH-1:0] RESET_VAL = 4'h0;
+  localparam logic [WIDTH-1:0] RESETVAL = 4'h0;
 
   // Destination Clock Domain (100 MHz -> 10ns period)
   logic             clk;
@@ -89,12 +89,12 @@ module tb_top;
     // Step 1: Execute Reset Validation
     reset_dut();
 
-    if (sync_data === RESET_VAL) begin
+    if (sync_data === RESETVAL) begin
       pass_count++;
-      $display("[RESET CHECK PASS] Output matches RESET_VAL (0x%0h)", sync_data);
+      $display("[RESET CHECK PASS] Output matches RESETVAL (0x%0h)", sync_data);
     end else begin
       fail_count++;
-      $error("[RESET CHECK FAIL] Expected: 0x%0h | Actual: 0x%0h", RESET_VAL, sync_data);
+      $error("[RESET CHECK FAIL] Expected: 0x%0h | Actual: 0x%0h", RESETVAL, sync_data);
     end
 
     // Step 2: Directed Vector Latency Tests
