@@ -31,7 +31,7 @@ XVLOG_INC     := -i $(COMMON_DIR)/macros -i $(PWD)/tb
 # ------------------------------------------------------------------------------
 # 2. Simulator & Linter Tool Settings
 # ------------------------------------------------------------------------------
-SIM_TOP     := tb_ram_top
+SIM_TOP     := tb_top
 SNAPSHOT    := $(SIM_TOP)_snapshot
 VCD_FILE    := $(WAVE_DIR)/dump.vcd
 
@@ -41,6 +41,7 @@ VERILATOR_FLAGS := --lint-only -Wall --assert $(VERILATOR_INC) \
                    -y $(COMMON_DIR)/interfaces \
                    -y $(COMMON_DIR)/assertions \
                    -y rtl
+
 
 # Vivado XSim Flags
 XVLOG_FLAGS     := -sv $(XVLOG_INC) -d SIMULATION
