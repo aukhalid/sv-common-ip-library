@@ -101,14 +101,16 @@ module tb_top;
             if (rdata1 === (i * 32'h1111_1111)) pass_count++;
             else begin
                 fail_count++;
-                $error("[FAIL Port 1] Reg %0d Expected: 0x%0h | Actual: 0x%0h", i, i*32'h1111_1111, rdata1);
+                $error("[FAIL Port 1] Reg %0d Expected: 0x%0h | Actual: 0x%0h",
+                       i, i*32'h1111_1111, rdata1);
             end
 
             if (i + 1 < RegDepth) begin
                 if (rdata2 === ((i + 1) * 32'h1111_1111)) pass_count++;
                 else begin
                     fail_count++;
-                    $error("[FAIL Port 2] Reg %0d Expected: 0x%0h | Actual: 0x%0h", i+1, (i+1)*32'h1111_1111, rdata2);
+                    $error("[FAIL Port 2] Reg %0d Expected: 0x%0h | Actual: 0x%0h",
+                           i+1, (i+1)*32'h1111_1111, rdata2);
                 end
             end
         end
@@ -131,5 +133,4 @@ module tb_top;
         $dumpfile("dump.vcd");
         $dumpvars(0, tb_top);
     end
-
 endmodule : tb_top
