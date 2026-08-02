@@ -1,6 +1,6 @@
 # ==============================================================================
 # COMPANY: ADN Semiconductors (Validation Lab)
-# ASSET:   Universal Child Makefile (Leaf IP Level)
+# ASSET:   Child Makefile for Hierarchical Async FIFO Subsystem
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -13,20 +13,29 @@ COMMON_DIR  := $(REPO_ROOT)/common
 BUILD_DIR   := $(PWD)/build
 WAVE_DIR    := $(BUILD_DIR)/waves
 
-# Local source file discovery
-RTL_SRCS    := $(wildcard rtl/*.sv)
-TB_PKG      := $(wildcard tb/tb_pkg.sv)
-TB_TOP      := $(wildcard tb/tb_*top.sv)
-BIND_SRC    := $(wildcard tb/*_bind.sv)
+# Local source file discovery (Converts to absolute paths)
+LOCAL_RTL   := $(abspath $(wildcard rtl/*.sv))
 
-# Common global infrastructure discovery (sorted alphabetically)
-PKG_SRCS    := $(sort $(wildcard $(COMMON_DIR)/packages/*.sv))
-IF_SRCS     := $(sort $(wildcard $(COMMON_DIR)/interfaces/*.sv))
-ASRT_SRCS   := $(sort $(wildcard $(COMMON_DIR)/assertions/*.sv))
+# External Submodule Dependencies (Absolute paths)
+SUBMODULE_SRCS := $(abspath $(wildcard $(REPO_ROOT)/memory/dual_port_ram/rtl/*.sv)) \
+                  $(abspath $(wildcard $(REPO_ROOT)/foundation/two_flop_sync/rtl/*.sv)) \
+                  $(abspath $(wildcard $(REPO_ROOT)/combinational/gray_converter/bin_to_gray/rtl/*.sv))
+
+# Combined RTL Compilation Sources
+RTL_SRCS    := $(SUBMODULE_SRCS) $(LOCAL_RTL)
+
+TB_PKG      := $(abspath $(wildcard tb/tb_pkg.sv))
+TB_TOP      := $(abspath $(wildcard tb/tb_*top.sv))
+BIND_SRC    := $(abspath $(wildcard tb/*_bind.sv))
+
+# Common global infrastructure discovery (sorted absolute paths)
+PKG_SRCS    := $(abspath $(sort $(wildcard $(COMMON_DIR)/packages/*.sv)))
+IF_SRCS     := $(abspath $(sort $(wildcard $(COMMON_DIR)/interfaces/*.sv)))
+ASRT_SRCS   := $(abspath $(sort $(wildcard $(COMMON_DIR)/assertions/*.sv)))
 
 # Include directory flags
-VERILATOR_INC := -I$(COMMON_DIR)/macros
-XVLOG_INC     := -i $(COMMON_DIR)/macros -i $(PWD)/tb
+VERILATOR_INC := -I. -Irtl -I$(COMMON_DIR)/macros
+XVLOG_INC     := -i . -i rtl -i $(COMMON_DIR)/macros -i $(PWD)/tb
 
 # ------------------------------------------------------------------------------
 # 2. Simulator & Linter Tool Settings
@@ -36,12 +45,14 @@ SNAPSHOT    := $(SIM_TOP)_snapshot
 VCD_FILE    := $(WAVE_DIR)/dump.vcd
 
 # Verilator Flags
-VERILATOR_FLAGS := --lint-only -Wall --assert $(VERILATOR_INC) \
+VERILATOR_FLAGS := --lint-only -Wall --assert -DSIMULATION $(VERILATOR_INC) \
                    -y $(COMMON_DIR)/packages \
                    -y $(COMMON_DIR)/interfaces \
                    -y $(COMMON_DIR)/assertions \
-                   -y rtl
-
+                   -y rtl \
+                   -y $(REPO_ROOT)/memory/dual_port_ram/rtl \
+                   -y $(REPO_ROOT)/foundation/two_flop_sync/rtl \
+                   -y $(REPO_ROOT)/combinational/gray_converter/bin_to_gray/rtl
 
 # Vivado XSim Flags
 XVLOG_FLAGS     := -sv $(XVLOG_INC) -d SIMULATION
@@ -74,17 +85,21 @@ sim: setup
 	@if [ -n "$(strip $(IF_SRCS))" ];   then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(IF_SRCS); fi
 	@if [ -n "$(strip $(ASRT_SRCS))" ]; then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(ASRT_SRCS); fi
 	@echo "=== [SIM SUCCESS] Packages & Infrastructure Compiling Done ==="
-	@echo "=== [SIM] Compiling Design RTL ==="
-	@if [ -n "$(strip $(RTL_SRCS))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(RTL_SRCS)); fi
+
+	@echo "=== [SIM] Compiling Submodule & Target RTL ==="
+	@if [ -n "$(strip $(RTL_SRCS))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(RTL_SRCS); fi
 	@echo "=== [SIM SUCCESS] Design RTL Compiling Done ==="
+
 	@echo "=== [SIM] Compiling Testbench Suite ==="
-	@if [ -n "$(strip $(TB_PKG))" ];    then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(TB_PKG)); fi
-	@if [ -n "$(strip $(BIND_SRC))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(BIND_SRC)); fi
-	@if [ -n "$(strip $(TB_TOP))" ];    then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(addprefix ../,$(TB_TOP)); fi
+	@if [ -n "$(strip $(TB_PKG))" ];    then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(TB_PKG); fi
+	@if [ -n "$(strip $(BIND_SRC))" ];  then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(BIND_SRC); fi
+	@if [ -n "$(strip $(TB_TOP))" ];    then cd $(BUILD_DIR) && xvlog $(XVLOG_FLAGS) $(TB_TOP); fi
 	@echo "=== [SIM SUCCESS] Testbench Suite Compiling Done ==="
-	@echo "=== [SIM] Elaborating & Running Simulation ==="
+
+	@echo "=== [SIM] Elaborating Design ==="
 	@cd $(BUILD_DIR) && xelab $(SIM_TOP) -s $(SNAPSHOT) -debug typical
 	@echo "=== [SIM SUCCESS] Elaboration Done ==="
+
 	@echo "=== [SIM] Running Simulation Execution ==="
 	@cd $(BUILD_DIR) && xsim $(SNAPSHOT) -runall
 	@if [ -f $(BUILD_DIR)/dump.vcd ]; then mv $(BUILD_DIR)/dump.vcd $(VCD_FILE); fi

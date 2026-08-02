@@ -28,14 +28,14 @@ module tb_top;
       .DATA_WIDTH(DATA_WIDTH),
       .ADDR_WIDTH(ADDR_WIDTH)
   ) DUT (
-      .wclk_i   (wclk_if.clk),
-      .wrst_n_i (wclk_if.rst_n),
+      .wr_clk_i   (wclk_if.clk),
+      .wr_rst_n_i (wclk_if.rst_n),
       .wr_en_i  (fifo_vif.wr_en),
       .wr_data_i(fifo_vif.wr_data),
       .full_o   (fifo_vif.full),
 
-      .rclk_i   (rclk_if.clk),
-      .rrst_n_i (rclk_if.rst_n),
+      .rd_clk_i   (rclk_if.clk),
+      .rd_rst_n_i (rclk_if.rst_n),
       .rd_en_i  (fifo_vif.rd_en),
       .rd_data_o(fifo_vif.rd_data),
       .empty_o  (fifo_vif.empty)
