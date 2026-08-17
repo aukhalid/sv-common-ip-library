@@ -1,4 +1,4 @@
-# sv-common-ip-library
+# SystemVerilog Common IP Library
 
 > A robust, parameterizable SystemVerilog RTL and Design Verification (DV) infrastructure library designed to serve as the foundational hardware block layer for modern ASIC and FPGA SoC designs. Enforces strict **IP Reuse** principles, modular layered testbenches, and concurrent formal assertions across all modules.
 
