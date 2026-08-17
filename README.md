@@ -6,7 +6,7 @@
 
 ## Table of Contents
 
-0. [Evnironment Setup](#evnironment-setup)
+0. [Environment Setup](documents/01_environment_setup_guide.md)
 1. [Architectural Overview](#1-architectural-overview)
 2. [Repository Structure](#2-repository-structure)
 3. [Module Inventory & Status](#3-module-inventory--status)
@@ -17,10 +17,6 @@
 8. [Author & License](#8-author--license)
 
 ---
-
-## Evnironment Setup
-
-[Environment Setup](documents/01_environment_setup_guide.md)
 
 ## 1. Architectural Overview
 
