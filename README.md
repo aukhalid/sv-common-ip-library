@@ -7,18 +7,18 @@
 ## Table of Contents
 
 0. [Environment Setup](documents/01_environment_setup_guide.md)
-1. [Architectural Overview](#1-architectural-overview)
-2. [Repository Structure](#2-repository-structure)
-3. [Module Inventory & Status](#3-module-inventory--status)
-4. [Verification Architecture](#4-verification-architecture)
-5. [Toolchain & Build Automation](#5-toolchain--build-automation)
-6. [Quick Start & Execution Guide](#6-quick-start--execution-guide)
-7. [Downstream SoC Integration](#7-downstream-soc-integration)
-8. [Author & License](#8-author--license)
+1. [Architectural Overview](#architectural-overview)
+2. [Repository Structure](#repository-structure)
+3. [Module Inventory & Status](#module-inventory--status)
+4. [Verification Architecture](#verification-architecture)
+5. [Toolchain & Build Automation](#toolchain--build-automation)
+6. [Quick Start & Execution Guide](#quick-start--execution-guide)
+7. [Downstream SoC Integration](#downstream-soc-integration)
+8. [Author & License](#author--license)
 
 ---
 
-## 1. Architectural Overview
+## Architectural Overview
 
 The `sv-common-ip-library` provides standard hardware primitives required across higher-level subsystems (such as APB Peripheral Suites, AXI Interconnects, DMA Controllers, and RISC-V SoC cores).
 
@@ -56,24 +56,7 @@ The `sv-common-ip-library` provides standard hardware primitives required across
 
 ---
 
-## 3. Module Inventory & Status
-
-| Category | Module | Verification Strategy | SVA Layer | Status |
-|---|---|---|---|---|
-| Memory | `single_port_ram` | Tier 1 (OOP Layered TB: Gen/Drv/Mon/Scb) | `ASSERT_NO_X`, Address Stability | ✅ Completed |
-| Memory | `dual_port_ram` | Tier 1 (OOP Layered TB: Gen/Drv/Mon/Scb) | `ASSERT_NO_X`, Concurrent Write/Read Guards | ✅ Completed |
-| Memory | `register_file` | Tier 2 (Self-Checking TB) | Hardwired R0 Protection, Write Invariance | ✅ Completed |
-| Memory | `sync_fifo` | Tier 1 (OOP Layered TB: Queue Reference Model) | Overflow, Underflow, Handshake Checks | ✅ Completed |
-| Memory | `async_fifo` | Tier 1 (Dual-Clock OOP TB + CDC Verification) | Pointer Wrap-around, Full/Empty CDC Guards | ✅ Completed |
-| Foundation | `two_flop_sync` | Tier 2 (Randomized Phase Offset TB) | Setup/Hold Timing Mitigation, Reset Value Held | ✅ Completed |
-| Foundation | `clk_divider` | Tier 2 (Self-Checking Period Checker) | Frequency Division Assertion, Non-Zero Ratio Check | ✅ Completed |
-| Foundation | `edge_detector` | Tier 2 (Self-Checking Pulse Checker) | Mutually Exclusive Edge Assertions | ✅ Completed |
-| Combinational | `bin_to_gray` | Tier 3 (Exhaustive $2^N$ Sweep) | Unit-Distance (Hamming Distance == 1) Check | ✅ Completed |
-| Combinational | `gray_to_bin` | Tier 3 (Exhaustive $2^N$ Sweep) | Mathematical Identity Inversion Check | ✅ Completed |
-
----
-
-## 4. Verification Architecture
+## Verification Architecture
 
 Modules are verified based on functional complexity:
 
